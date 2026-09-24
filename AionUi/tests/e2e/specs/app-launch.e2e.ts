@@ -6,6 +6,7 @@
  */
 import { test, expect } from '../fixtures';
 import { createErrorCollector, waitForSettle } from '../helpers';
+import { httpGet } from '../helpers/httpBridge';
 
 test.describe('App Launch', () => {
   test('window opens and has a title', async ({ page }) => {
@@ -23,5 +24,11 @@ test.describe('App Launch', () => {
     const collector = createErrorCollector(page);
     await waitForSettle(page);
     expect(collector.critical()).toHaveLength(0);
+  });
+
+  test('packaged backend includes the custom model comparison routes', async ({ page }) => {
+    await page.waitForFunction(() => (window as unknown as { __backendPort?: number }).__backendPort);
+    const models = await httpGet<unknown>(page, '/api/model-bench/models');
+    expect(Array.isArray(models)).toBe(true);
   });
 });

@@ -65,5 +65,24 @@
     "create": "创建",
     "modify": "修改",
     "delete": "删除"
+  },
+  "kinds": {
+    "execute": "执行命令",
+    "edit": "修改文件",
+    "read": "读取文件",
+    "write": "写入文件",
+    "fetch": "获取网页",
+    "search": "搜索内容",
+    "tool": "工具",
+    "ask": "回答问题",
+    "list": "列出文件"
+  },
+  "summary": {
+    "viewSteps": "查看步骤",
+    "loadError": "完整输出加载失败",
+    "input": "输入",
+    "output": "输出",
+    "callId": "工具调用编号：",
+    "actionCount": "{{count}} 项操作"
   }
 }

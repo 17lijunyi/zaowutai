@@ -31,7 +31,11 @@
     "switchSuccess": "Modelo alterado com sucesso",
     "switchFailed": "Falha ao alternar o modelo",
     "searchPlaceholder": "Buscar modelos",
-    "noResults": "Nenhum modelo correspondente"
+    "noResults": "Nenhum modelo correspondente",
+    "loadModels": "Carregar modelos",
+    "loadFailed": "Não foi possível carregar os modelos. Tente novamente ou verifique a configuração do agente.",
+    "refreshModels": "Atualizar modelos",
+    "refreshSuccess": "Lista de modelos atualizada"
   },
   "config": {
     "setting": "Aplicando configuração...",
@@ -43,7 +47,18 @@
   "thoughtLevel": {
     "label": "Nível de raciocínio",
     "switchSuccess": "Nível de raciocínio alterado",
-    "switchFailed": "Falha ao alterar o nível de raciocínio"
+    "switchFailed": "Falha ao alterar o nível de raciocínio",
+    "levels": {
+      "none": "Nenhum",
+      "minimal": "Mínimo",
+      "low": "Baixo",
+      "medium": "Médio",
+      "high": "Alto",
+      "xhigh": "Muito alto",
+      "max": "Máximo",
+      "ultra": "Ultra",
+      "auto": "Automático"
+    }
   },
   "warmup": {
     "clickToWake": "Clique para ativar este membro"

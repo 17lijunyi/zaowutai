@@ -16,15 +16,24 @@ import { Download } from '@icon-park/react';
 import { createTwoFilesPatch } from 'diff';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { getToolDisplayName } from '@/renderer/services/i18n/toolLabels';
 import MarkdownView from '@renderer/components/Markdown';
 
 const StatusTag: React.FC<{ status: string }> = ({ status }) => {
+  const { t } = useTranslation();
   const getTagProps = () => {
     switch (status) {
       case 'pending':
-        return { color: 'blue', text: 'Pending' };
+        return { color: 'blue', text: t('tools.status.pending') };
       case 'in_progress':
-        return { color: 'orange', text: 'In Progress' };
+        return { color: 'orange', text: t('tools.status.executing') };
+      case 'completed':
+        return { color: 'green', text: t('tools.status.success') };
+      case 'failed':
+        return { color: 'red', text: t('tools.status.error') };
+      case 'canceled':
+      case 'cancelled':
+        return { color: 'gray', text: t('tools.status.canceled') };
       default:
         return { color: 'gray', text: status };
     }
@@ -40,7 +49,8 @@ const DiffContentView: React.FC<{ old_text: string; new_text: string; path: stri
   new_text,
   path,
 }) => {
-  const display_name = path.split(/[/\\]/).pop() || path || 'Unknown file';
+  const { t } = useTranslation();
+  const display_name = path.split(/[/\\]/).pop() || path || t('tools.unknownFile');
   const formattedDiff = useMemo(
     () => createTwoFilesPatch(display_name, display_name, old_text, new_text, '', '', { context: 3 }),
     [display_name, old_text, new_text]
@@ -84,19 +94,6 @@ const ContentView: React.FC<{ content: IMessageAcpToolCall['content']['update'][
   }
 
   return null;
-};
-
-const getKindDisplayName = (toolKind: string) => {
-  switch (toolKind) {
-    case 'edit':
-      return 'File Edit';
-    case 'read':
-      return 'File Read';
-    case 'execute':
-      return 'Shell Command';
-    default:
-      return toolKind;
-  }
 };
 
 const MessageAcpToolCall: React.FC<{ message: IMessageAcpToolCall }> = ({ message }) => {
@@ -143,7 +140,7 @@ const MessageAcpToolCall: React.FC<{ message: IMessageAcpToolCall }> = ({ messag
       <div className='flex items-start gap-3'>
         <div className='flex-1 min-w-0'>
           <div className='flex items-center gap-2 mb-2'>
-            <span className='font-medium text-t-primary'>{title || getKindDisplayName(kind)}</span>
+            <span className='font-medium text-t-primary'>{getToolDisplayName(title || kind, t)}</span>
             <StatusTag status={status} />
           </div>
           {rawInput && (
@@ -182,7 +179,9 @@ const MessageAcpToolCall: React.FC<{ message: IMessageAcpToolCall }> = ({ messag
               ))}
             </div>
           )}
-          <div className='text-xs text-t-secondary mt-2'>Tool Call ID: {tool_call_id}</div>
+          <div className='text-xs text-t-secondary mt-2'>
+            {t('tools.summary.callId')} {tool_call_id}
+          </div>
         </div>
       </div>
     </Card>

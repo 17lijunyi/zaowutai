@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import type { TFunction } from 'i18next';
+
 export type PermissionIntent = 'allow-once' | 'allow-always' | 'reject-once' | 'reject-always' | 'neutral';
 
 export type PermissionOperationKind = 'execute' | 'edit' | 'read' | 'fetch' | 'tool';
@@ -16,6 +18,21 @@ export type PermissionPanelOption = {
   testId: string;
   disabled?: boolean;
 };
+
+const GENERIC_OPTION_LABELS = {
+  'allow-once': ['allow', 'allow once', 'allow this time', 'proceed once'],
+  'allow-always': ['allow always', 'always allow', 'proceed always'],
+  'reject-once': ['reject', 'reject once', 'deny', 'deny once', 'cancel'],
+  'reject-always': ['reject always', 'always reject', 'deny always', 'always deny'],
+};
+
+/** Localize standard choices while preserving provider-specific permission scopes. */
+export function getPermissionOptionLabel(label: string, intent: PermissionIntent, t: TFunction): string {
+  if (intent === 'neutral') return label;
+  const normalized = label.trim().replace(/[_-]/g, ' ').replace(/\s+/g, ' ').toLowerCase();
+  if (normalized && !GENERIC_OPTION_LABELS[intent].includes(normalized)) return label;
+  return t(`codex.permissions.${intent.replace('-', '_')}`);
+}
 
 export const classifyLegacyPermission = (value: string): PermissionIntent => {
   switch (value) {

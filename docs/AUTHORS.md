@@ -1,3 +1,16 @@
+# 造物台维护与上游作者
+
+## 当前衍生版本
+
+- 名称：造物台 / Zaowutai
+- 维护者：[@17lijunyi](https://github.com/17lijunyi)
+- 来源：[周承健的产品经理工作台](https://github.com/Zhouchengjian-user/product-manager-workbench)
+- 本分支改动：[ZAOWUTAI.md](ZAOWUTAI.md)
+
+以下保留原项目的作者与品牌说明；其中“本分支”指原产品经理工作台分支。
+
+---
+
 # 作者与品牌
 
 ## 产品作者

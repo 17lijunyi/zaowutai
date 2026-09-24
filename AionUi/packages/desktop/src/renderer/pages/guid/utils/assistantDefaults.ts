@@ -10,7 +10,8 @@ export type ResolvedGuidAssistantDefaults = {
 };
 
 export const resolveGuidAssistantDefaults = (
-  detail: AssistantDetail | null | undefined
+  detail: AssistantDetail | null | undefined,
+  rememberedThoughtLevel?: string
 ): ResolvedGuidAssistantDefaults => {
   if (!detail) {
     return {
@@ -42,7 +43,7 @@ export const resolveGuidAssistantDefaults = (
     thoughtLevelDefault.mode === 'fixed'
       ? thoughtLevelDefault.value
       : thoughtLevelDefault.mode === 'auto'
-        ? detail.preferences.last_thought_level_value
+        ? rememberedThoughtLevel || detail.preferences.last_thought_level_value
         : undefined;
 
   const skillIds =

@@ -4,15 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getThoughtLevelLabel } from '@/renderer/utils/model/thoughtLevelLabel';
 import type { IProvider, TProviderWithModel } from '@/common/config/storage';
 import { iconColors } from '@/renderer/styles/colors';
 import { getModelDisplayLabel } from '@/renderer/utils/model/agentLogo';
 import type { AgentRuntimeDerivedOption } from '@/renderer/utils/model/agentRuntimeCatalog';
 import type { AcpModelInfo } from '../types';
 import { getAvailableModels } from '../utils/modelUtils';
-import { Button, Dropdown, Menu, Tooltip } from '@arco-design/web-react';
-import { Brain, Down, Plus } from '@icon-park/react';
-import React from 'react';
+import { Button, Dropdown, Menu, Tooltip, Message } from '@arco-design/web-react';
+import { Brain, Down, Plus, Refresh } from '@icon-park/react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ipcBridge } from '@/common';
+import { refreshManagedAgentCatalogAndAssistants } from '@/renderer/hooks/agent/useManagedAgents';
+import {
+  buildAgentRuntimeModelInfo,
+  buildAgentRuntimeThoughtLevelOption,
+} from '@/renderer/utils/model/agentRuntimeCatalog';
+import { formatManagedAgentDiagnosticMessage } from '@/renderer/utils/model/agentTypes';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -26,6 +34,7 @@ import {
 } from '@/renderer/components/agent/runtimeSelectorOptions';
 
 type GuidModelSelectorProps = {
+  agentId?: string;
   // Gemini model state
   isGeminiMode: boolean;
   modelList: IProvider[];
@@ -44,6 +53,7 @@ type GuidModelSelectorProps = {
 const providerCompositeId = (providerId: string, modelName: string) => `${providerId}::${modelName}`;
 
 const GuidModelSelector: React.FC<GuidModelSelectorProps> = ({
+  agentId,
   isGeminiMode,
   modelList,
   current_model,
@@ -57,6 +67,64 @@ const GuidModelSelector: React.FC<GuidModelSelectorProps> = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const defaultModelLabel = t('common.defaultModel');
+  const [loadingModels, setLoadingModels] = useState(false);
+  const loadingRef = useRef(false);
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+  const loadModels = async () => {
+    if (!agentId || loadingRef.current) return;
+    loadingRef.current = true;
+    setLoadingModels(true);
+    try {
+      const result = await ipcBridge.acpConversation.checkManagedAgentHealthById.invoke({ id: agentId });
+      if (!mountedRef.current) return;
+      if (result.status !== 'online') {
+        await refreshManagedAgentCatalogAndAssistants();
+        Message.error(formatManagedAgentDiagnosticMessage(t, result) || t('agent.model.loadFailed'));
+        return;
+      }
+      // The backend serializes catalog writes on a separate channel. A successful
+      // health response can arrive before its model snapshot is committed.
+      const previousModels = JSON.stringify(currentAcpCachedModelInfo);
+      for (let attempt = 0; attempt < 4; attempt++) {
+        const agents = await refreshManagedAgentCatalogAndAssistants();
+        if (!mountedRef.current) return;
+        const agent = agents?.find((agent) => agent.id === agentId);
+        const models = buildAgentRuntimeModelInfo(agent);
+        // A cached nonempty list can still be the old snapshot. Allow the queued
+        // catalog write to land even when this refresh returns the same models.
+        if (models?.available_models.length && (JSON.stringify(models) !== previousModels || attempt === 3)) {
+          if (selectedAcpModel && !models.available_models.some((model) => model.id === selectedAcpModel)) {
+            setSelectedAcpModel(null);
+          }
+          const thoughtLevel = buildAgentRuntimeThoughtLevelOption(agent);
+          if (
+            thoughtLevelOption?.currentValue &&
+            thoughtLevel &&
+            !thoughtLevel.options.some((option) => option.value === thoughtLevelOption.currentValue)
+          ) {
+            const fallback = thoughtLevel.currentValue || thoughtLevel.options[0]?.value;
+            if (fallback) onThoughtLevelSelect?.(fallback);
+          }
+          Message.success(t('agent.model.refreshSuccess'));
+          return;
+        }
+        if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+      Message.info(t('settings.noAvailableModels'));
+    } catch (error) {
+      console.error('[Guid] Failed to load agent models:', error);
+      if (mountedRef.current) Message.error(t('agent.model.loadFailed'));
+    } finally {
+      loadingRef.current = false;
+      if (mountedRef.current) setLoadingModels(false);
+    }
+  };
 
   // 过滤掉被禁用的 provider
   const enabledModelList = React.useMemo(() => {
@@ -108,6 +176,7 @@ const GuidModelSelector: React.FC<GuidModelSelectorProps> = ({
         }
       : null;
   const combinedAcpButtonLabel = composeRuntimeSelectorLabel({
+    t,
     modelLabel: acpButtonLabel,
     thoughtLevel: normalizedThoughtLevelOption,
   });
@@ -199,6 +268,7 @@ const GuidModelSelector: React.FC<GuidModelSelectorProps> = ({
         <RuntimeSelectorModelList
           models={currentAcpCachedModelInfo.available_models}
           currentModelId={selectedAcpModel}
+          disabled={loadingModels}
           onSelect={(modelId) => setSelectedAcpModel(modelId)}
         />
       );
@@ -230,13 +300,14 @@ const GuidModelSelector: React.FC<GuidModelSelectorProps> = ({
                     title={
                       <RuntimeSelectorSubMenuTitle
                         label={t('agent.thoughtLevel.label')}
-                        value={getCurrentThoughtLevelLabel(normalizedThoughtLevelOption)}
+                        value={getCurrentThoughtLevelLabel(normalizedThoughtLevelOption, t)}
                       />
                     }
                   >
                     {normalizedThoughtLevelOption.options.map((item) => (
                       <Menu.Item
                         key={item.value}
+                        disabled={loadingModels}
                         className={item.value === normalizedThoughtLevelOption.currentValue ? '!bg-2' : ''}
                         onClick={() => onThoughtLevelSelect?.(item.value)}
                       >
@@ -244,7 +315,7 @@ const GuidModelSelector: React.FC<GuidModelSelectorProps> = ({
                           selected={item.value === normalizedThoughtLevelOption.currentValue}
                           description={item.description}
                         >
-                          {item.label}
+                          {getThoughtLevelLabel(item.value, item.label, t)}
                         </RuntimeSelectorCheckedItem>
                       </Menu.Item>
                     ))}
@@ -253,10 +324,24 @@ const GuidModelSelector: React.FC<GuidModelSelectorProps> = ({
               ) : (
                 modelListNode
               )}
+              {agentId && (
+                <Menu.Item
+                  key='refresh-models'
+                  disabled={loadingModels}
+                  onClick={() => {
+                    void loadModels();
+                  }}
+                >
+                  <span className='flex items-center gap-8px'>
+                    <Refresh theme='outline' size='14' />
+                    {t('agent.model.refreshModels')}
+                  </span>
+                </Menu.Item>
+              )}
             </Menu>
           }
         >
-          <Button className={'sendbox-model-btn guid-config-btn'} shape='round' size='small'>
+          <Button className={'sendbox-model-btn guid-config-btn'} shape='round' size='small' loading={loadingModels}>
             <span className='flex items-center gap-6px min-w-0'>
               <Brain theme='outline' size='14' fill={iconColors.secondary} className='shrink-0' />
               <span className='guid-model-label'>{combinedAcpButtonLabel}</span>
@@ -284,13 +369,25 @@ const GuidModelSelector: React.FC<GuidModelSelectorProps> = ({
     );
   }
 
-  // Fallback: no model switching
+  // An empty cache is not evidence that the agent cannot switch models.
   return (
-    <Tooltip content={t('conversation.welcome.modelSwitchNotSupported')} position='top'>
-      <Button className={'sendbox-model-btn guid-config-btn'} shape='round' size='small' style={{ cursor: 'default' }}>
+    <Tooltip
+      content={t(agentId ? 'agent.model.loadModels' : 'conversation.welcome.modelSwitchNotSupported')}
+      position='top'
+    >
+      <Button
+        className={'sendbox-model-btn guid-config-btn'}
+        shape='round'
+        size='small'
+        loading={loadingModels}
+        disabled={!agentId}
+        onClick={() => {
+          void loadModels();
+        }}
+      >
         <span className='flex items-center gap-6px min-w-0'>
           <Brain theme='outline' size='14' fill={iconColors.secondary} className='shrink-0' />
-          <span className='guid-model-label'>{defaultModelLabel}</span>
+          <span className='guid-model-label'>{agentId ? t('agent.model.loadModels') : defaultModelLabel}</span>
         </span>
       </Button>
     </Tooltip>

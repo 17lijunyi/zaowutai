@@ -5,7 +5,8 @@
  */
 
 import { ipcBridge } from '@/common';
-import { APP_DISPLAY_NAME, APP_MONOGRAM } from '@/common/branding';
+import { APP_DISPLAY_NAME } from '@/common/branding';
+import appIcon from '@renderer/assets/logos/brand/app.png';
 import { TEAM_MODE_ENABLED } from '@/common/config/constants';
 import PwaPullToRefresh from '@/renderer/components/layout/PwaPullToRefresh';
 import Titlebar from '@/renderer/components/layout/Titlebar';
@@ -385,7 +386,7 @@ const Layout: React.FC<{
               collapsedWidth={isMobile ? 0 : 0}
               collapsed={collapsed}
               width={siderWidth}
-              className={classNames('!bg-2 layout-sider', {
+              className={classNames('layout-sider', {
                 collapsed: collapsed,
               })}
               style={siderStyle}
@@ -400,20 +401,18 @@ const Layout: React.FC<{
                 )}
               >
                 <div
-                  className={classNames('bg-black shrink-0 size-32px relative rd-0.5rem', {
+                  className={classNames('brand-mark shrink-0 size-32px relative rd-0.5rem', {
                     '!size-24px': collapsed,
                   })}
                   onClick={onClick}
                 >
-                  <span
-                    className={classNames(
-                      'brand-monogram absolute inset-0 flex items-center justify-center text-white font-bold leading-none select-none',
-                      collapsed ? 'text-11px' : 'text-15px'
-                    )}
+                  <img
+                    src={appIcon}
+                    alt=''
+                    className='brand-image absolute inset-0 size-full object-contain select-none'
                     aria-hidden='true'
-                  >
-                    {APP_MONOGRAM}
-                  </span>
+                    draggable={false}
+                  />
                 </div>
                 {isSettingsRoute ? (
                   <Tooltip content={t('common.back', { defaultValue: 'Back to Chat' })} position='bottom'>
@@ -475,7 +474,7 @@ const Layout: React.FC<{
                 per-conversation subtree → persists across same-project switches. */}
             <div ref={mainRowRef} className='flex flex-1 min-h-0 overflow-hidden'>
               <ArcoLayout.Content
-                className={'bg-1 layout-content flex flex-col min-h-0 flex-1'}
+                className={'layout-content flex flex-col min-h-0 flex-1'}
                 onClick={() => {
                   if (isMobile && !collapsed) setCollapsed(true);
                 }}

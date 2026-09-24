@@ -31,7 +31,11 @@
     "switchSuccess": "模型切換成功",
     "switchFailed": "模型切換失敗",
     "searchPlaceholder": "搜尋模型",
-    "noResults": "沒有符合的模型"
+    "noResults": "沒有符合的模型",
+    "loadModels": "載入模型",
+    "loadFailed": "模型載入失敗，請重試或檢查 Agent 設定",
+    "refreshModels": "重新整理模型列表",
+    "refreshSuccess": "模型列表已更新"
   },
   "config": {
     "setting": "正在套用設定...",
@@ -43,7 +47,18 @@
   "thoughtLevel": {
     "label": "思考強度",
     "switchSuccess": "思考強度切換成功",
-    "switchFailed": "思考強度切換失敗"
+    "switchFailed": "思考強度切換失敗",
+    "levels": {
+      "none": "關閉",
+      "minimal": "極低",
+      "low": "低",
+      "medium": "中",
+      "high": "高",
+      "xhigh": "極高",
+      "max": "最高",
+      "ultra": "超強",
+      "auto": "自動"
+    }
   },
   "warmup": {
     "clickToWake": "點擊喚醒該成員"

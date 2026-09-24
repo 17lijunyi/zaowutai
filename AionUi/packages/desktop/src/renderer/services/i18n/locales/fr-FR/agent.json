@@ -31,7 +31,11 @@
     "switchSuccess": "Le modèle a changé avec succès",
     "switchFailed": "Échec du changement de modèle",
     "searchPlaceholder": "Rechercher des modèles",
-    "noResults": "Aucun modèle correspondant"
+    "noResults": "Aucun modèle correspondant",
+    "loadModels": "Charger les modèles",
+    "loadFailed": "Impossible de charger les modèles. Réessayez ou vérifiez la configuration de l’agent.",
+    "refreshModels": "Actualiser les modèles",
+    "refreshSuccess": "Liste des modèles actualisée"
   },
   "config": {
     "setting": "Application du paramètre...",
@@ -43,7 +47,18 @@
   "thoughtLevel": {
     "label": "Niveau de réflexion",
     "switchSuccess": "Niveau de réflexion changé",
-    "switchFailed": "Échec du changement de niveau de réflexion"
+    "switchFailed": "Échec du changement de niveau de réflexion",
+    "levels": {
+      "none": "Aucun",
+      "minimal": "Minimal",
+      "low": "Faible",
+      "medium": "Moyen",
+      "high": "Élevé",
+      "xhigh": "Très élevé",
+      "max": "Maximum",
+      "ultra": "Ultra",
+      "auto": "Automatique"
+    }
   },
   "warmup": {
     "clickToWake": "Cliquez pour réveiller ce membre"

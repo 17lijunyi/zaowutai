@@ -31,7 +31,11 @@
     "switchSuccess": "モデルを切り替えました",
     "switchFailed": "モデルの切り替えに失敗しました",
     "searchPlaceholder": "モデルを検索",
-    "noResults": "一致するモデルがありません"
+    "noResults": "一致するモデルがありません",
+    "loadModels": "モデルを読み込む",
+    "loadFailed": "モデルを読み込めません。再試行するか、エージェント設定を確認してください。",
+    "refreshModels": "モデル一覧を更新",
+    "refreshSuccess": "モデル一覧を更新しました"
   },
   "config": {
     "setting": "設定を適用しています...",
@@ -43,7 +47,18 @@
   "thoughtLevel": {
     "label": "思考レベル",
     "switchSuccess": "思考レベルを切り替えました",
-    "switchFailed": "思考レベルの切り替えに失敗しました"
+    "switchFailed": "思考レベルの切り替えに失敗しました",
+    "levels": {
+      "none": "なし",
+      "minimal": "最小",
+      "low": "低",
+      "medium": "中",
+      "high": "高",
+      "xhigh": "非常に高い",
+      "max": "最大",
+      "ultra": "超高",
+      "auto": "自動"
+    }
   },
   "warmup": {
     "clickToWake": "クリックしてこのメンバーを起動"

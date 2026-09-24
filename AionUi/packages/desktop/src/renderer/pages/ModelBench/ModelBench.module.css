@@ -9,7 +9,7 @@
   padding: 24px;
   box-sizing: border-box;
   overflow-y: auto;
-  background: var(--color-bg-1);
+  background: transparent;
   color: var(--color-text-1);
 }
 .header {
@@ -64,7 +64,8 @@
   min-height: 280px;
   border: 1px solid var(--color-border-2);
   border-radius: 12px;
-  background: var(--color-bg-2);
+  background: var(--paper-elevated);
+  box-shadow: var(--paper-shadow);
   overflow: hidden;
 }
 .columnHeader {

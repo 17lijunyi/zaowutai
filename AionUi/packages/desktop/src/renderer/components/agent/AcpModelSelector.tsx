@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getThoughtLevelLabel } from '@/renderer/utils/model/thoughtLevelLabel';
 import { useAcpModelInfo } from '@/renderer/hooks/agent/useAcpModelInfo';
 import { classifyConfigSetError, type AcpConfigOptionsPort } from '@/renderer/hooks/agent/useAcpConfigOptions';
 import { useLayoutContext } from '@/renderer/hooks/context/LayoutContext';
@@ -125,7 +126,7 @@ const AcpModelSelector: React.FC<{
     defaultModelLabel,
     fallbackLabel: t('conversation.welcome.useCliModel'),
   });
-  const combinedLabel = composeRuntimeSelectorLabel({ modelLabel: display_label, thoughtLevel });
+  const combinedLabel = composeRuntimeSelectorLabel({ t, modelLabel: display_label, thoughtLevel });
   const isRuntimeSetting = isConfigSetting(setStatus);
   const handleThoughtLevelSelect = useCallback(
     async (value: string) => {
@@ -252,7 +253,7 @@ const AcpModelSelector: React.FC<{
                 title={
                   <RuntimeSelectorSubMenuTitle
                     label={t('agent.thoughtLevel.label')}
-                    value={getCurrentThoughtLevelLabel(thoughtLevel)}
+                    value={getCurrentThoughtLevelLabel(thoughtLevel, t)}
                   />
                 }
               >
@@ -270,7 +271,7 @@ const AcpModelSelector: React.FC<{
                       selected={item.value === thoughtLevel.currentValue}
                       description={item.description}
                     >
-                      {item.label}
+                      {getThoughtLevelLabel(item.value, item.label, t)}
                     </RuntimeSelectorCheckedItem>
                   </Menu.Item>
                 ))}

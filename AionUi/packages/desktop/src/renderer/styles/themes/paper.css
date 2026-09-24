@@ -1,0 +1,72 @@
+/* Static backgrounds never create a containing block or intercept interaction.
+   Keep folds at the page edges and use opaque paper for readable surfaces. */
+.app-shell {
+  background:
+    var(--paper-texture) repeat,
+    var(--bg-1);
+}
+
+.app-shell .layout,
+.app-shell .chat-layout,
+.app-shell .chat-layout-body {
+  background: transparent;
+}
+
+.app-shell .layout-content,
+.login-page {
+  background: var(--app-wallpaper);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.app-shell .paper-page,
+.app-shell .settings-page-wrapper {
+  background: transparent;
+}
+
+.app-shell .app-titlebar,
+.app-shell .layout-sider,
+.app-shell .chat-layout-header--glass {
+  background:
+    var(--paper-texture) repeat,
+    var(--glass-surface);
+  border-color: var(--glass-border);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.app-shell .brand-mark {
+  background: transparent;
+}
+
+.app-shell .sider-section-label {
+  background:
+    var(--paper-texture) repeat,
+    var(--glass-surface);
+  border-radius: 8px;
+}
+
+.app-shell .sendbox-panel {
+  background: var(--glass-elevated);
+  border-color: var(--border-base);
+  box-shadow: var(--paper-shadow);
+}
+
+/* Compact windows keep a quiet paper field without crowding text with folds. */
+@media (max-width: 767px) {
+  .app-shell .layout-content,
+  .login-page {
+    background:
+      var(--paper-texture) repeat,
+      var(--bg-1);
+  }
+}
+
+@media (prefers-contrast: more) {
+  .app-shell,
+  .app-shell .layout-content,
+  .login-page {
+    background: var(--bg-base);
+  }
+}

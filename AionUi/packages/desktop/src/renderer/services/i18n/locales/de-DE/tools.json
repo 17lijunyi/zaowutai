@@ -65,5 +65,24 @@
     "create": "erstellen",
     "modify": "ändern",
     "delete": "löschen"
+  },
+  "kinds": {
+    "execute": "Befehl ausführen",
+    "edit": "Datei bearbeiten",
+    "read": "Datei lesen",
+    "write": "Datei schreiben",
+    "fetch": "Seite abrufen",
+    "search": "Inhalt suchen",
+    "tool": "Werkzeug",
+    "ask": "Fragen beantworten",
+    "list": "Dateien auflisten"
+  },
+  "summary": {
+    "viewSteps": "Schritte anzeigen",
+    "loadError": "Vollständige Ausgabe konnte nicht geladen werden",
+    "input": "Eingabe",
+    "output": "Ausgabe",
+    "callId": "Werkzeugaufruf-ID:",
+    "actionCount": "{{count}} Aktionen"
   }
 }

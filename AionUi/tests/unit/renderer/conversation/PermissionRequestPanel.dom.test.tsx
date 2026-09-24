@@ -261,11 +261,11 @@ describe('PermissionRequestPanel', () => {
   });
 
   it.each(['execute', 'edit', 'read', 'fetch', 'tool'] as const)(
-    'renders the raw %s operation kind without a header icon',
+    'renders the localized %s operation kind without a header icon',
     (operationKind) => {
       renderPanel({ operationKind });
       const card = screen.getByTestId('message-permission-card');
-      expect(within(card).getByText(operationKind)).toBeInTheDocument();
+      expect(within(card).getByText(`tools.kinds.${operationKind}`)).toBeInTheDocument();
       expect(card.querySelector('svg')).toBeNull();
     }
   );

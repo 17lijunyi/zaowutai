@@ -65,5 +65,24 @@
     "create": "생성",
     "modify": "수정",
     "delete": "삭제"
+  },
+  "kinds": {
+    "execute": "명령 실행",
+    "edit": "파일 수정",
+    "read": "파일 읽기",
+    "write": "파일 쓰기",
+    "fetch": "페이지 가져오기",
+    "search": "내용 검색",
+    "tool": "도구",
+    "ask": "질문에 답하기",
+    "list": "파일 목록"
+  },
+  "summary": {
+    "viewSteps": "단계 보기",
+    "loadError": "전체 출력을 불러오지 못했습니다",
+    "input": "입력",
+    "output": "출력",
+    "callId": "도구 호출 ID:",
+    "actionCount": "작업 {{count}}개"
   }
 }

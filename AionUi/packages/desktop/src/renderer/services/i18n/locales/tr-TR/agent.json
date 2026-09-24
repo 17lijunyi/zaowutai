@@ -31,7 +31,11 @@
     "switchSuccess": "Model switched successfully",
     "switchFailed": "Failed to switch model",
     "searchPlaceholder": "Model ara",
-    "noResults": "Eşleşen model yok"
+    "noResults": "Eşleşen model yok",
+    "loadModels": "Modelleri yükle",
+    "loadFailed": "Modeller yüklenemedi. Tekrar deneyin veya aracı yapılandırmasını kontrol edin.",
+    "refreshModels": "Modelleri yenile",
+    "refreshSuccess": "Model listesi yenilendi"
   },
   "config": {
     "setting": "Ayar uygulanıyor...",
@@ -43,7 +47,18 @@
   "thoughtLevel": {
     "label": "Düşünme düzeyi",
     "switchSuccess": "Düşünme düzeyi değiştirildi",
-    "switchFailed": "Düşünme düzeyi değiştirilemedi"
+    "switchFailed": "Düşünme düzeyi değiştirilemedi",
+    "levels": {
+      "none": "Yok",
+      "minimal": "En az",
+      "low": "Düşük",
+      "medium": "Orta",
+      "high": "Yüksek",
+      "xhigh": "Çok yüksek",
+      "max": "Maksimum",
+      "ultra": "Ultra",
+      "auto": "Otomatik"
+    }
   },
   "warmup": {
     "clickToWake": "Bu üyeyi uyandırmak için tıklayın"

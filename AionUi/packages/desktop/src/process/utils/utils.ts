@@ -16,6 +16,9 @@ export const hasElectronAppPath = (): boolean => {
 };
 
 const getElectronPathOrFallback = (name: 'temp' | 'home' | 'userData'): string => {
+  // Storage can initialize before configureChromium redirects Electron paths.
+  const isolatedDataDir = process.env.AIONUI_E2E_TEST === '1' ? process.env.AIONUI_E2E_USER_DATA_DIR?.trim() : '';
+  if (name === 'userData' && isolatedDataDir) return path.resolve(isolatedDataDir);
   const paths = getPlatformServices().paths;
   switch (name) {
     case 'temp':
@@ -42,6 +45,12 @@ export const getTempPath = () => {
  * CLI 工具如 Qwen 无法正确处理路径中的空格。
  */
 const ensureCliSafeSymlink = (targetPath: string, symlinkName: string): string => {
+  // An isolated test instance must never repoint the running app's ~/.aionui
+  // aliases at a disposable directory. The backend keeps those paths for later
+  // workspace/SQLite access, so repointing them can break the real session.
+  if (process.env.AIONUI_E2E_TEST === '1' && process.env.AIONUI_E2E_USER_DATA_DIR?.trim()) {
+    return targetPath;
+  }
   // Only needed when the platform explicitly requires CLI-safe symlinks
   // (Electron on macOS, where userData lives under "Application Support" which contains spaces)
   if (!getPlatformServices().paths.needsCliSafeSymlinks()) {

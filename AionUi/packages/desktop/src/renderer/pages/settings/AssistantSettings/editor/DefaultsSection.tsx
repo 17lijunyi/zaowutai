@@ -1,3 +1,4 @@
+import { getThoughtLevelLabel } from '@/renderer/utils/model/thoughtLevelLabel';
 import type { BuiltinAutoSkill, SkillInfo } from '../types';
 import type { IMcpServer } from '@/common/config/storage';
 import { DROPDOWN_SEARCH_THRESHOLD } from '@/renderer/components/agent/runtimeSelectorOptions';
@@ -251,10 +252,14 @@ const DefaultsSection: React.FC<DefaultsSectionProps> = ({
                 <Select.Option key={`${localeKey}-${option.value}`} value={option.value}>
                   {option.description ? (
                     <Tooltip content={option.description} position='right'>
-                      <span className='block min-w-0 truncate'>{option.label}</span>
+                      <span className='block min-w-0 truncate'>
+                        {getThoughtLevelLabel(option.value, option.label, t)}
+                      </span>
                     </Tooltip>
                   ) : (
-                    <span className='block min-w-0 truncate'>{option.label}</span>
+                    <span className='block min-w-0 truncate'>
+                      {getThoughtLevelLabel(option.value, option.label, t)}
+                    </span>
                   )}
                 </Select.Option>
               ))}

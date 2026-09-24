@@ -24,6 +24,8 @@ Applying a theme (`utils/theme/applyTheme.ts`) drives two DOM attributes and app
 
 Baseline colors live in `default-color-scheme.css`. A theme's `tokens` / `css` are layered on top of that baseline; they override, they do not replace it.
 
+造物台的默认基线采用纸艺风格：浅色为奶油白纸张与陶橙强调色，深色为暖褐纸张。`paper.css` 负责全局背景；`arco-override.css` 将组件和 portal 浮层映射到相同语义颜色。保留 `--glass-*` 作为兼容别名，其默认值已指向不透明纸张表面，不再使用背景模糊。背景资源和生成提示词见 `../../assets/themes/README.md`。
+
 ## File structure 文件结构
 
 ```

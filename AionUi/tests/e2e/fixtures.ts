@@ -17,6 +17,7 @@ import { _electron as electron } from 'playwright';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
+import { execFileSync } from 'node:child_process';
 
 type Fixtures = {
   electronApp: ElectronApplication;
@@ -160,13 +161,19 @@ function resolvePackagedApp(): { executablePath: string; cwd: string } | null {
       if (fs.existsSync(exe)) return { executablePath: exe, cwd: path.join(outDir, dir) };
     }
   } else if (platform === 'darwin') {
-    // out/mac-arm64/AionUi.app/Contents/MacOS/AionUi  or  out/mac/AionUi.app/...
+    // Read the executable from the bundle so custom product names also work.
     for (const dir of ['mac-arm64', 'mac-x64', 'mac', 'mac-universal']) {
       const macDir = path.join(outDir, dir);
       if (!fs.existsSync(macDir)) continue;
       const appBundle = fs.readdirSync(macDir).find((f) => f.endsWith('.app'));
       if (appBundle) {
-        const exe = path.join(macDir, appBundle, 'Contents', 'MacOS', 'AionUi');
+        const contentsDir = path.join(macDir, appBundle, 'Contents');
+        const executableName = execFileSync(
+          '/usr/bin/plutil',
+          ['-extract', 'CFBundleExecutable', 'raw', path.join(contentsDir, 'Info.plist')],
+          { encoding: 'utf8' }
+        ).trim();
+        const exe = path.join(contentsDir, 'MacOS', executableName);
         if (fs.existsSync(exe)) return { executablePath: exe, cwd: macDir };
       }
     }

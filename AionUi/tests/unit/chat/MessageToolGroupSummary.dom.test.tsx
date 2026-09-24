@@ -82,7 +82,7 @@ describe('MessageToolGroupSummary ACP image output', () => {
     };
 
     render(<MessageToolGroupSummary messages={[message]} />);
-    fireEvent.click(screen.getByText('View Steps · 1'));
+    fireEvent.click(screen.getByText('tools.summary.viewSteps · 1'));
 
     const image = screen.getByTestId('local-image');
     expect(image).toHaveAttribute('src', '/Users/test/.codex/generated_images/session/ig_test_image.png');
@@ -113,7 +113,7 @@ describe('MessageToolGroupSummary ACP image output', () => {
     };
 
     render(<MessageToolGroupSummary messages={[message]} />);
-    fireEvent.click(screen.getByText('View Steps · 1'));
+    fireEvent.click(screen.getByText('tools.summary.viewSteps · 1'));
     fireEvent.click(screen.getByLabelText('acp.image.download_aria'));
 
     expect(mockDownloadFileFromPath).toHaveBeenCalledWith(imagePath, 'ig_test_image.png');
@@ -145,7 +145,7 @@ describe('MessageToolGroupSummary ACP image output', () => {
     };
 
     render(<MessageToolGroupSummary messages={[message]} />);
-    fireEvent.click(screen.getByText('View Steps · 1'));
+    fireEvent.click(screen.getByText('tools.summary.viewSteps · 1'));
     fireEvent.click(screen.getByLabelText('acp.image.download_aria'));
 
     await waitFor(() => {
@@ -179,7 +179,7 @@ describe('MessageToolGroupSummary ACP image output', () => {
     };
 
     render(<MessageToolGroupSummary messages={[message]} />);
-    fireEvent.click(screen.getByText('View Steps · 1'));
+    fireEvent.click(screen.getByText('tools.summary.viewSteps · 1'));
 
     expect(screen.getByLabelText('acp.image.download_aria')).toBeInTheDocument();
   });
@@ -198,9 +198,35 @@ describe('MessageToolGroupSummary ACP image output', () => {
     };
 
     render(<MessageToolGroupSummary messages={[message]} />);
-    fireEvent.click(screen.getByText('View Steps · 1'));
+    fireEvent.click(screen.getByText('tools.summary.viewSteps · 1'));
 
     expect(screen.queryByTestId('local-image')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('acp.image.download_aria')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['Read 验收样本.txt', 'commandExecution', 'tools.kinds.read 验收样本.txt'],
+    ['Search 中文关键词', 'commandExecution', 'tools.kinds.search 中文关键词'],
+    ['List files /tmp/项目', 'commandExecution', 'tools.kinds.list /tmp/项目'],
+    ['Run echo Read', 'commandExecution', 'tools.kinds.execute echo Read'],
+    ['Read app.ts · 2 actions', 'commandExecution', 'tools.kinds.read app.ts · tools.summary.actionCount'],
+    ['Read custom tool', 'dynamicToolCall', 'Read custom tool'],
+  ])('localizes the Codex command label %s without changing tool input', (name, type, expected) => {
+    const input = { type, command: 'cat /tmp/验收样本.txt' };
+    const message: IMessageToolCall = {
+      id: 'codex-tool',
+      conversation_id: 'conv-1',
+      type: 'tool_call',
+      content: { call_id: 'codex-tool', name, args: {}, input, status: 'completed', output: 'ZW-0922' },
+    };
+    render(<MessageToolGroupSummary messages={[message]} />);
+    fireEvent.click(screen.getByText('tools.summary.viewSteps · 1'));
+    fireEvent.click(screen.getByText(expected));
+    expect(screen.getByText('ZW-0922')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        (_, element) => element?.tagName === 'PRE' && element.textContent === JSON.stringify(input, null, 2)
+      )
+    ).toBeInTheDocument();
   });
 });

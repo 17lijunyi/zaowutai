@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getThoughtLevelLabel } from '@/renderer/utils/model/thoughtLevelLabel';
+import { getCurrentThoughtLevelLabel } from '@/renderer/components/agent/runtimeSelectorOptions';
 import { ipcBridge } from '@/common';
 import type { IMcpServer, IProvider, TProviderWithModel } from '@/common/config/storage';
 import AgentModeSelector from '@/renderer/components/agent/AgentModeSelector';
@@ -163,7 +165,8 @@ const GuidActionRow: React.FC<GuidActionRowProps> = ({
       setMcpQuery('');
     }
   }, []);
-  const showModeSwitch = dynamicModes.length > 0;
+  // Pi exposes thinking levels as legacy modes; use the model menu's thought-level control.
+  const showModeSwitch = modeBackend !== 'pi' && dynamicModes.length > 0;
   const configOptionCount = (modelSelectorNode ? 1 : 0) + (showModeSwitch ? 1 : 0);
 
   // Browser file picker ref (WebUI only)
@@ -281,12 +284,12 @@ const GuidActionRow: React.FC<GuidActionRowProps> = ({
         key: 'thought-level',
         icon: <Brain theme='outline' size='16' />,
         label: t('agent.thoughtLevel.label'),
-        meta: thoughtLevelOption.options.find((o) => o.value === currentValue)?.label || currentValue || '',
+        meta: getCurrentThoughtLevelLabel(thoughtLevelOption, t),
         submenu: {
           title: t('agent.thoughtLevel.label'),
           options: thoughtLevelOption.options.map((o) => ({
             key: o.value,
-            label: o.label,
+            label: getThoughtLevelLabel(o.value, o.label, t),
             description: o.description ?? undefined,
             active: o.value === currentValue,
           })),
@@ -296,7 +299,7 @@ const GuidActionRow: React.FC<GuidActionRowProps> = ({
     }
 
     // Permission / agent mode.
-    if (dynamicModes.length > 0) {
+    if (showModeSwitch) {
       const modeOptions: MobileActionSheetOption[] = dynamicModes.map((mode) => ({
         key: mode.value,
         label: t(`agentMode.${mode.value}`, { defaultValue: mode.label }),
@@ -413,6 +416,7 @@ const GuidActionRow: React.FC<GuidActionRowProps> = ({
     thoughtLevelOption,
     onThoughtLevelSelect,
     dynamicModes,
+    showModeSwitch,
     selectedMode,
     onModeSelect,
     allSkills,

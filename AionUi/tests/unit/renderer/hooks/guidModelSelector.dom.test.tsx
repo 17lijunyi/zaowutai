@@ -32,6 +32,9 @@ vi.mock('react-i18next', () => ({
       if (key === 'common.model') return 'Model';
       if (key === 'conversation.welcome.modelSwitchNotSupported') return 'Model switch is not supported';
       if (key === 'agent.thoughtLevel.label') return 'Thinking Level';
+      if (key === 'agent.thoughtLevel.levels.low') return 'Low';
+      if (key === 'agent.thoughtLevel.levels.medium') return 'Medium';
+      if (key === 'agent.thoughtLevel.levels.high') return 'High';
       return key;
     },
   }),

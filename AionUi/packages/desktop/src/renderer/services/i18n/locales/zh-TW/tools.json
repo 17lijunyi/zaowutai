@@ -65,5 +65,24 @@
     "create": "建立",
     "modify": "修改",
     "delete": "刪除"
+  },
+  "kinds": {
+    "execute": "執行指令",
+    "edit": "修改檔案",
+    "read": "讀取檔案",
+    "write": "寫入檔案",
+    "fetch": "取得網頁",
+    "search": "搜尋內容",
+    "tool": "工具",
+    "ask": "回答問題",
+    "list": "列出檔案"
+  },
+  "summary": {
+    "viewSteps": "查看步驟",
+    "loadError": "完整輸出載入失敗",
+    "input": "輸入",
+    "output": "輸出",
+    "callId": "工具呼叫編號：",
+    "actionCount": "{{count}} 項操作"
   }
 }

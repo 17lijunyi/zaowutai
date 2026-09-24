@@ -82,6 +82,32 @@ describe('useGuidSend', () => {
     swrMutateMock.mockResolvedValue(undefined);
   });
 
+  it('uses the visible thought level for both Pi configuration paths instead of the hidden old mode', async () => {
+    const deps = createDeps();
+    deps.selectedAssistantBackend = 'pi';
+    deps.selectedMode = 'medium';
+    deps.selectedThoughtLevelValue = 'high';
+    const { result } = renderHook(() => useGuidSend(deps));
+    await act(async () => {
+      await result.current.handleSend();
+    });
+    expect(createConversationInvokeMock.mock.calls[0][0].assistant.conversation_overrides).toMatchObject({
+      permission: 'high',
+      thought_level: 'high',
+    });
+  });
+
+  it('does not send a stale Pi mode when no thought level is selected', async () => {
+    const deps = createDeps();
+    deps.selectedAssistantBackend = 'pi';
+    deps.selectedMode = 'medium';
+    const { result } = renderHook(() => useGuidSend(deps));
+    await act(async () => {
+      await result.current.handleSend();
+    });
+    expect(createConversationInvokeMock.mock.calls[0][0].assistant.conversation_overrides.permission).toBeUndefined();
+  });
+
   it('passes selected mode into assistant conversation overrides when creating a preset ACP conversation', async () => {
     const deps = createDeps();
     (deps as any).selectedThoughtLevelValue = 'high';

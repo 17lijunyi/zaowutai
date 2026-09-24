@@ -435,7 +435,7 @@ const AssistantChatSlot: React.FC<{
   // 抬头不叠身份色底（避免压低彩色名字的可读性）；成员身份仅由抬头里的“彩色名字”承担。
   // 列身体保留极淡身份色底作弱提示，不影响气泡阅读。
   return (
-    <div className='flex flex-col h-full' style={{ background: `color-mix(in srgb, ${color} 4%, var(--bg-base))` }}>
+    <div className='paper-page flex flex-col h-full'>
       <div className='flex items-center justify-between gap-8px px-12px h-40px shrink-0 border-b border-solid border-[color:var(--border-base)] relative z-10 bg-1'>
         <TeamAgentIdentity
           assistant_name={assistant.assistant_name}

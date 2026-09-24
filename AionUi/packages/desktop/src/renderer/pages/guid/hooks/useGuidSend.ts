@@ -163,7 +163,8 @@ export const useGuidSend = (deps: GuidSendDeps): GuidSendResult => {
       selectedAcpModel || (assistantBackend === 'aionrs' ? current_model?.use_model : undefined) || undefined;
     const assistantOverrides = {
       model: assistantOverrideModel,
-      permission: selectedMode || undefined,
+      // Pi's legacy mode also controls thinking. Keep it aligned with the single visible selector.
+      permission: (assistantBackend === 'pi' ? selectedThoughtLevelValue : selectedMode) || undefined,
       thought_level: selectedThoughtLevelValue || undefined,
       skill_ids: enabled_skills_to_send,
       disabled_builtin_skill_ids: excludeBuiltinSkills,

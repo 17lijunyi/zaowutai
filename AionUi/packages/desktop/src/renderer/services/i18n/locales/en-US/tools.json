@@ -65,5 +65,24 @@
     "create": "create",
     "modify": "modify",
     "delete": "delete"
+  },
+  "kinds": {
+    "execute": "Run command",
+    "edit": "Edit file",
+    "read": "Read file",
+    "write": "Write file",
+    "fetch": "Fetch page",
+    "search": "Search content",
+    "tool": "Tool",
+    "ask": "Answer questions",
+    "list": "List files"
+  },
+  "summary": {
+    "viewSteps": "View Steps",
+    "loadError": "Failed to load full output",
+    "input": "Input",
+    "output": "Output",
+    "callId": "Tool Call ID:",
+    "actionCount": "{{count}} actions"
   }
 }

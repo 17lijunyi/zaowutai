@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getThoughtLevelLabel } from '@/renderer/utils/model/thoughtLevelLabel';
 import type { AionrsModelSelection } from './useAionrsModelSelection';
 import type { AcpConfigSetStatus, AcpDerivedOption } from '@/renderer/hooks/agent/useAcpConfigOptions';
 import {
@@ -77,7 +78,7 @@ const AionrsModelSelector: React.FC<{
     defaultModelLabel,
     fallbackLabel: t('conversation.welcome.selectModel'),
   });
-  const combinedLabel = composeRuntimeSelectorLabel({ modelLabel: label, thoughtLevel });
+  const combinedLabel = composeRuntimeSelectorLabel({ t, modelLabel: label, thoughtLevel });
   const handleThoughtLevelSelect = (value: string) => {
     if (!thoughtLevel || value === thoughtLevel.currentValue || !onSetThoughtLevel) return;
     void onSetThoughtLevel(thoughtLevel.id, value);
@@ -135,7 +136,7 @@ const AionrsModelSelector: React.FC<{
                 title={
                   <RuntimeSelectorSubMenuTitle
                     label={t('agent.thoughtLevel.label')}
-                    value={getCurrentThoughtLevelLabel(thoughtLevel)}
+                    value={getCurrentThoughtLevelLabel(thoughtLevel, t)}
                   />
                 }
               >
@@ -149,7 +150,7 @@ const AionrsModelSelector: React.FC<{
                       selected={item.value === thoughtLevel.currentValue}
                       description={item.description}
                     >
-                      {item.label}
+                      {getThoughtLevelLabel(item.value, item.label, t)}
                     </RuntimeSelectorCheckedItem>
                   </Menu.Item>
                 ))}

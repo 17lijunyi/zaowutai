@@ -2,10 +2,11 @@
  * Prepare aioncore binary for packaging.
  *
  * Resolution order:
- *  1. GitHub Actions artifact download when AIONUI_BACKEND_RUN_ID is set
- *  2. GitHub release download (requires version or defaults to "latest")
- *  3. Complete local bundle from AIONUI_BACKEND_LOCAL_BUNDLE_DIR
- *  4. Local binary fallback from AIONUI_BACKEND_LOCAL_BINARY
+ *  1. Complete local bundle from AIONUI_BACKEND_LOCAL_BUNDLE_DIR
+ *  2. GitHub Actions artifact download when AIONUI_BACKEND_RUN_ID is set
+ *  3. Build package.json's aioncoreSource when configured (no release fallback)
+ *  4. GitHub release download for projects without aioncoreSource
+ *  5. Local binary fallback from AIONUI_BACKEND_LOCAL_BINARY
  *
  * Output: {projectRoot}/resources/bundled-aioncore/{platform}-{arch}/
  *   - aioncore[.exe]
@@ -155,6 +156,35 @@ function verifyPreparedAioncoreBundle(projectRoot, platform, arch) {
 // ---------------------------------------------------------------------------
 // Source resolvers
 // ---------------------------------------------------------------------------
+
+/** A fork's frontend and backend must ship together, even at the same version. */
+function buildWorkspaceAioncore(projectRoot, platform, arch) {
+  const packagePath = path.join(projectRoot, 'package.json');
+  if (!fs.existsSync(packagePath)) return null;
+  const { aioncoreSource } = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+  if (aioncoreSource === undefined) return null;
+  if (typeof aioncoreSource !== 'string' || !aioncoreSource.trim()) {
+    throw new Error('package.json aioncoreSource must point to the backend source directory');
+  }
+  const sourceDir = path.resolve(projectRoot, aioncoreSource);
+  if (!fs.existsSync(path.join(sourceDir, 'Cargo.toml'))) {
+    throw new Error(`Configured AionCore source is missing: ${sourceDir}. Refusing to replace it with upstream.`);
+  }
+  // Resource preparation executes the built binary. Cross-target releases must
+  // provide a complete bundle from a matching host, not run a foreign binary.
+  if (platform !== process.platform || arch !== process.arch) {
+    throw new Error('Build AionCore on the target host or supply AIONUI_BACKEND_LOCAL_BUNDLE_DIR for this target');
+  }
+  const targetDir = path.join(sourceDir, 'target');
+  console.log(`  Building workspace AionCore: ${sourceDir}`);
+  execFileSync('cargo', ['build', '--locked', '--release', '-p', 'aionui-app', '--target-dir', targetDir], {
+    cwd: sourceDir,
+    stdio: 'inherit',
+  });
+  const binaryPath = path.join(targetDir, 'release', getBinaryName(platform));
+  if (!fs.existsSync(binaryPath)) throw new Error(`Workspace build did not produce ${binaryPath}`);
+  return { binaryPath, sourceDir };
+}
 
 /**
  * Resolve the actual version tag when "latest" is requested.
@@ -508,6 +538,15 @@ function prepareAioncore(options) {
   let sourceType = 'none';
   let sourceDetail = {};
   let tempDir = null;
+
+  if (!actionsRunId) {
+    const workspace = buildWorkspaceAioncore(projectRoot, platform, arch);
+    if (workspace) {
+      sourcePath = workspace.binaryPath;
+      sourceType = 'workspace';
+      sourceDetail = { path: workspace.sourceDir };
+    }
+  }
 
   // 1. Download from GitHub Actions artifacts when manual build run id is provided.
   if (actionsRunId) {

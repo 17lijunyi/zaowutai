@@ -117,7 +117,7 @@ const ScheduledTasksPage: React.FC = () => {
   );
 
   return (
-    <div className='w-full h-full min-h-0 box-border bg-1 flex flex-col overflow-hidden'>
+    <div className='paper-page w-full h-full min-h-0 box-border flex flex-col overflow-hidden'>
       <div
         className={classNames(
           'shrink-0 bg-1',

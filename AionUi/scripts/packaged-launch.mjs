@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import { spawn } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 
 function parseArgs(argv) {
   const flags = new Set(argv.filter((x) => x.startsWith('--')));
@@ -39,7 +39,13 @@ function resolvePackagedApp(projectRoot) {
       if (!fs.existsSync(macDir)) continue;
       const appBundle = fs.readdirSync(macDir).find((f) => f.endsWith('.app'));
       if (!appBundle) continue;
-      const exe = path.join(macDir, appBundle, 'Contents', 'MacOS', 'AionUi');
+      const contentsDir = path.join(macDir, appBundle, 'Contents');
+      const executableName = execFileSync(
+        '/usr/bin/plutil',
+        ['-extract', 'CFBundleExecutable', 'raw', path.join(contentsDir, 'Info.plist')],
+        { encoding: 'utf8' }
+      ).trim();
+      const exe = path.join(contentsDir, 'MacOS', executableName);
       if (fs.existsSync(exe)) return { executablePath: exe, cwd: macDir };
     }
   } else {

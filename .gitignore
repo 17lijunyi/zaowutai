@@ -5,3 +5,13 @@ target/
 .env.*
 !.env.example
 *.log
+
+# Local verification notes and runtime data
+docs/造物台检查记录-*.md
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.dmg
+*.p12

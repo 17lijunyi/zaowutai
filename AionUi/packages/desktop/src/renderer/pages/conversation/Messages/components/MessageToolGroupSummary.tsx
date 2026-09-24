@@ -10,6 +10,7 @@ import type { NormalizedToolCall, NormalizedToolStatus, ToolMessage } from '@/co
 import { normalizeToolMessages, hasRunningToolMessages } from '@/common/chat/normalizeToolCall';
 import LocalImageView from '@/renderer/components/media/LocalImageView';
 import { downloadFileFromPath } from '@/renderer/utils/file/download';
+import { getToolDisplayName } from '@/renderer/services/i18n/toolLabels';
 import './MessageToolGroupSummary.css';
 
 const statusToBadge = (status: NormalizedToolStatus): BadgeProps['status'] => {
@@ -87,9 +88,11 @@ const ToolItemDetail: React.FC<{ item: NormalizedToolCall }> = ({ item }) => {
           }
           onClick={hasDetail ? toggleExpanded : undefined}
         >
-          <span className='font-medium text-13px'>{displayItem.name}</span>
+          <span className='font-medium text-13px'>
+            {getToolDisplayName(displayItem.name, t, displayItem.protocolType)}
+          </span>
           {displayItem.description && displayItem.description !== displayItem.name && (
-            <span className='m-l-4px opacity-80 text-13px'>{displayItem.description}</span>
+            <span className='m-l-4px opacity-80 text-13px'>{getToolDisplayName(displayItem.description, t)}</span>
           )}
         </span>
         {hasDetail && (
@@ -100,17 +103,17 @@ const ToolItemDetail: React.FC<{ item: NormalizedToolCall }> = ({ item }) => {
       </div>
       {expanded && hasDetail && (
         <div className='tool-detail-panel m-l-20px m-t-4px'>
-          {loadingFull && <div className='tool-detail-label'>Loading...</div>}
-          {loadError && <div className='tool-detail-label'>Failed to load full output</div>}
+          {loadingFull && <div className='tool-detail-label'>{t('common.loading')}</div>}
+          {loadError && <div className='tool-detail-label'>{t('tools.summary.loadError')}</div>}
           {displayItem.input && (
             <div className='tool-detail-section'>
-              <div className='tool-detail-label'>Input</div>
+              <div className='tool-detail-label'>{t('tools.summary.input')}</div>
               <pre className='tool-detail-content'>{displayItem.input}</pre>
             </div>
           )}
           {displayItem.output && (
             <div className='tool-detail-section'>
-              <div className='tool-detail-label'>Output</div>
+              <div className='tool-detail-label'>{t('tools.summary.output')}</div>
               <pre className='tool-detail-content'>{displayItem.output}</pre>
             </div>
           )}
@@ -141,6 +144,7 @@ const ToolItemDetail: React.FC<{ item: NormalizedToolCall }> = ({ item }) => {
 };
 
 const MessageToolGroupSummary: React.FC<{ messages: ToolMessage[] }> = ({ messages }) => {
+  const { t } = useTranslation();
   const hasRunning = hasRunningToolMessages(messages);
   const [showMore, setShowMore] = useState(hasRunning);
 
@@ -156,7 +160,9 @@ const MessageToolGroupSummary: React.FC<{ messages: ToolMessage[] }> = ({ messag
         <span className='tool-group-summary__icon'>
           {hasRunning ? <Spin size={12} /> : <Checklist theme='outline' size='14' />}
         </span>
-        <span className='tool-group-summary__label'>View Steps {tools.length > 0 ? `· ${tools.length}` : ''}</span>
+        <span className='tool-group-summary__label'>
+          {t('tools.summary.viewSteps')} {tools.length > 0 ? `· ${tools.length}` : ''}
+        </span>
         <span className={`tool-group-summary__arrow${showMore ? ' tool-group-summary__arrow--open' : ''}`}>
           <Right theme='outline' size='12' />
         </span>

@@ -8,9 +8,11 @@ import { ipcBridge } from '@/common';
 import type { IMessagePermission } from '@/common/chat/chatLib';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { getToolDisplayName } from '@/renderer/services/i18n/toolLabels';
 import { PermissionRequestPanel } from './PermissionRequestPanel';
 import {
   classifyLegacyPermission,
+  getPermissionOptionLabel,
   normalizePermissionOperationKind,
   type PermissionPanelOption,
 } from './permissionOptions';
@@ -24,7 +26,8 @@ const MessagePermission: React.FC<MessagePermissionProps> = React.memo(({ messag
   const content = message.content || ({} as IMessagePermission['content']);
   const { description, title, action, call_id, command_type } = content;
   const options = Array.isArray(content.options) ? content.options : [];
-  const displayTitle = title || description || t('messages.permissionRequest');
+  const rawTitle = title || description || t('messages.permissionRequest');
+  const displayTitle = getToolDisplayName(rawTitle, t);
 
   const panelOptions = useMemo<PermissionPanelOption[]>(
     () =>
@@ -32,11 +35,12 @@ const MessagePermission: React.FC<MessagePermissionProps> = React.memo(({ messag
         const value = option ? String(option.value) : '';
         const fallbackId = `option_${index}`;
         const label = option?.label || `${t('messages.option')} ${index + 1}`;
+        const intent = classifyLegacyPermission(value);
         return {
           id: `${value || fallbackId}:${index}`,
           value,
-          label: t(label, { ...option?.params, defaultValue: label }),
-          intent: classifyLegacyPermission(value),
+          label: getPermissionOptionLabel(t(label, { ...option?.params, defaultValue: label }), intent, t),
+          intent,
           testId: `message-permission-option-${value || fallbackId}`,
         };
       }),
@@ -61,7 +65,7 @@ const MessagePermission: React.FC<MessagePermissionProps> = React.memo(({ messag
       requestKey={`${message.id}:${call_id}`}
       testIdPrefix='message-permission'
       title={displayTitle}
-      description={description && description !== displayTitle ? description : undefined}
+      description={description && description !== rawTitle ? description : undefined}
       operationKind={normalizePermissionOperationKind(action)}
       detail={command_type}
       options={panelOptions}
@@ -75,6 +79,7 @@ export {
   classifyAcpPermission,
   classifyLegacyPermission,
   getPermissionOptionsIdentity,
+  getPermissionOptionLabel,
   getSafePermissionOptionId,
   normalizePermissionOperationKind,
 } from './permissionOptions';

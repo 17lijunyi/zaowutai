@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import type { TFunction } from 'i18next';
+import { getThoughtLevelLabel } from '@/renderer/utils/model/thoughtLevelLabel';
 import type { AcpConfigSetStatus, AcpDerivedOption } from '@/renderer/hooks/agent/useAcpConfigOptions';
 import AionInlineSearchInput from '@/renderer/components/base/AionInlineSearchInput';
 import { Menu, Tooltip } from '@arco-design/web-react';
@@ -24,23 +26,28 @@ export type RuntimeSelectorModelGroup = { key: string; title: string; models: Ru
 const matchesModelQuery = (model: RuntimeSelectorModel, keyword: string): boolean =>
   (model.label || model.id).toLowerCase().includes(keyword);
 
-export const getCurrentThoughtLevelLabel = (thoughtLevel: AcpDerivedOption | null | undefined): string => {
-  if (!thoughtLevel) return '';
-  return (
-    thoughtLevel.options.find((item) => item.value === thoughtLevel.currentValue)?.label ||
-    thoughtLevel.currentValue ||
-    ''
+export const getCurrentThoughtLevelLabel = (
+  thoughtLevel: (Pick<AcpDerivedOption, 'options'> & { currentValue?: string | null }) | null | undefined,
+  t: TFunction
+): string => {
+  if (!thoughtLevel?.currentValue) return '';
+  return getThoughtLevelLabel(
+    thoughtLevel.currentValue,
+    thoughtLevel.options.find((item) => item.value === thoughtLevel.currentValue)?.label,
+    t
   );
 };
 
 export const composeRuntimeSelectorLabel = ({
   modelLabel,
   thoughtLevel,
+  t,
 }: {
   modelLabel: string;
+  t: TFunction;
   thoughtLevel?: AcpDerivedOption | null;
 }): string => {
-  const thoughtLevelLabel = getCurrentThoughtLevelLabel(thoughtLevel);
+  const thoughtLevelLabel = getCurrentThoughtLevelLabel(thoughtLevel, t);
   if (!thoughtLevelLabel) return modelLabel;
   return `${modelLabel} · ${thoughtLevelLabel}`;
 };

@@ -6,7 +6,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { APP_DISPLAY_NAME, APP_MONOGRAM } from '@/common/branding';
+import { APP_DISPLAY_NAME } from '@/common/branding';
 import React from 'react';
 
 // Mirror the project convention: t() echoes the key so labels/tooltips are assertable.
@@ -165,12 +165,12 @@ describe('Layout sider brand Home button', () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
-  it('renders the PM monogram inside the existing sidebar icon footprint', () => {
+  it('renders the brand mark inside the existing sidebar icon footprint', () => {
     const { container } = renderLayout();
 
-    const monogram = container.querySelector('.brand-monogram');
-    expect(monogram).toHaveTextContent(APP_MONOGRAM);
-    expect(monogram?.parentElement).toHaveClass('size-32px', 'bg-black');
+    const icon = container.querySelector('.brand-image');
+    expect(icon).toHaveAttribute('src', expect.stringContaining('app.png'));
+    expect(icon?.parentElement).toHaveClass('size-32px', 'brand-mark');
   });
 
   it('does not navigate when the wordmark is clicked in a non-settings route', () => {
@@ -210,8 +210,8 @@ describe('Layout sider brand Home button', () => {
     sessionStorage.setItem('aion:last-non-settings-path', '/conversation/abc');
     const { container } = renderLayout();
 
-    // The icon is the SVG-wrapping div (bg-black), separate from the wordmark.
-    const icon = container.querySelector('.bg-black') as HTMLElement;
+    // The compact mark is separate from the wordmark.
+    const icon = container.querySelector('.brand-mark') as HTMLElement;
     expect(icon).toBeTruthy();
     for (let i = 0; i < 4; i++) fireEvent.click(icon);
     expect(openDevTools).toHaveBeenCalled();

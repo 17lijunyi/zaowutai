@@ -23,6 +23,7 @@ const e2eUserDataDir = process.env.AIONUI_E2E_TEST === '1' ? process.env.AIONUI_
 if (e2eUserDataDir && e2eUserDataDir.trim() !== '') {
   fs.mkdirSync(e2eUserDataDir, { recursive: true });
   app.setPath('userData', e2eUserDataDir);
+  app.setAppLogsPath(path.join(e2eUserDataDir, 'logs'));
 }
 
 // ============ Environment Separation ============

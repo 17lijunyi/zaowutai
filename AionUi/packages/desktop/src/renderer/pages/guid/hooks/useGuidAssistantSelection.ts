@@ -5,6 +5,7 @@
  */
 
 import { assistantRuntimeKey, isAionrsAssistant, type Assistant } from '@/common/types/agent/assistantTypes';
+import { readGuidThoughtLevel, saveGuidThoughtLevel } from '../utils/thoughtLevelPreference';
 import { configService } from '@/common/config/configService';
 import type { AcpModelInfo } from '../types';
 import type { AgentModeOption } from '@/renderer/utils/model/agentTypes';
@@ -149,13 +150,16 @@ export const useGuidAssistantSelection = ({
   );
 
   const setSelectedThoughtLevelValue = useCallback(
-    (value: React.SetStateAction<string>, _options?: { persistPreference?: boolean }) => {
-      _setSelectedThoughtLevelValue((prev) => {
-        const nextValue = typeof value === 'function' ? value(prev) : value;
-        return nextValue;
-      });
+    (value: React.SetStateAction<string>, options?: { persistPreference?: boolean }) => {
+      const nextValue = typeof value === 'function' ? value(selectedThoughtLevelValue) : value;
+      _setSelectedThoughtLevelValue(nextValue);
+      if (options?.persistPreference !== false && selectedAssistantIdState && nextValue) {
+        void saveGuidThoughtLevel(selectedAssistantIdState, nextValue).catch((error) => {
+          console.error('[Guid] Failed to persist thought level:', error);
+        });
+      }
     },
-    []
+    [selectedAssistantIdState, selectedThoughtLevelValue]
   );
 
   const setSelectedAssistantId = useCallback(
@@ -319,7 +323,8 @@ export const useGuidAssistantSelection = ({
         return previousValue;
       }
 
-      return fallbackThoughtLevel;
+      const rememberedValue = readGuidThoughtLevel(selectedAssistantId);
+      return rememberedValue && optionValues.has(rememberedValue) ? rememberedValue : fallbackThoughtLevel;
     });
   }, [selectedAgentRuntimeThoughtLevelOption, selectedAssistantId]);
 

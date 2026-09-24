@@ -7,13 +7,18 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createInstance } from 'i18next';
+import zhTools from '@/renderer/services/i18n/locales/zh-CN/tools.json';
+import zhCodex from '@/renderer/services/i18n/locales/zh-CN/codex.json';
+import zhMessages from '@/renderer/services/i18n/locales/zh-CN/messages.json';
 import type { IMessageAcpPermission, IMessagePermission } from '@/common/chat/chatLib';
 import MessageAcpPermission from '@/renderer/pages/conversation/Messages/acp/MessageAcpPermission';
 import MessagePermission from '@/renderer/pages/conversation/Messages/components/MessagePermission';
 
-const { genericInvoke, acpInvoke } = vi.hoisted(() => ({
+const { genericInvoke, acpInvoke, translate } = vi.hoisted(() => ({
   genericInvoke: vi.fn(),
   acpInvoke: vi.fn(),
+  translate: vi.fn((key: string, options?: { defaultValue?: string }) => options?.defaultValue ?? key),
 }));
 
 vi.mock('@/common', () => ({
@@ -38,7 +43,7 @@ vi.mock('@/common/adapter/ipcBridge', () => ({
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, options?: { defaultValue?: string }) => options?.defaultValue ?? key,
+    t: translate,
   }),
 }));
 
@@ -87,15 +92,55 @@ const makeAcpMessage = (): IMessageAcpPermission => ({
 describe('permission message adapters', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    translate.mockImplementation((key, options) => options?.defaultValue ?? key);
     genericInvoke.mockResolvedValue(undefined);
     acpInvoke.mockResolvedValue(undefined);
+  });
+
+  it.each([
+    ['allow_once', 'Allow', '仅此次允许'],
+    ['allow_always', 'Allow Always', '总是允许'],
+    ['reject_once', 'Reject', '仅此次拒绝'],
+    ['reject_always', 'Reject Always', '总是拒绝'],
+  ])('shows the Chinese %s choice while submitting the original ACP option ID', async (kind, name, label) => {
+    const i18n = createInstance();
+    await i18n.init({
+      lng: 'zh-CN',
+      resources: { 'zh-CN': { translation: { tools: zhTools, codex: zhCodex, messages: zhMessages } } },
+    });
+    translate.mockImplementation((key, options) => i18n.t(key, options));
+    const message = makeAcpMessage();
+    message.content.tool_call.title = 'CommandExecution';
+    message.content.tool_call.kind = 'execute';
+    message.content.options = [{ option_id: `wire-${kind}`, kind, name }];
+    render(<MessageAcpPermission message={message} />);
+
+    expect(screen.queryByText('CommandExecution')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: label, exact: true }));
+    expect(acpInvoke).toHaveBeenCalledWith(
+      expect.objectContaining({ confirm_key: `wire-${kind}`, call_id: 'tool-call-1' })
+    );
+    expect(await screen.findByTestId('message-acp-permission-status')).toHaveTextContent('响应已成功发送');
+  });
+
+  it('preserves custom approval scope and unknown tool names instead of replacing their meaning', () => {
+    const message = makeAcpMessage();
+    message.content.tool_call.title = 'company_sensitive_export';
+    message.content.options = [
+      { option_id: 'scoped', kind: 'allow_always', name: 'Always allow read access to /tmp/reports only' },
+    ];
+    render(<MessageAcpPermission message={message} />);
+
+    expect(screen.getByRole('button', { name: 'Always allow read access to /tmp/reports only' })).toBeInTheDocument();
+    expect(screen.getByText('company_sensitive_export')).toBeInTheDocument();
+    expect(acpInvoke).not.toHaveBeenCalled();
   });
 
   it('keeps the generic payload exact and defaults confirmation to proceed_once', async () => {
     const message = makeGenericMessage();
     render(<MessagePermission message={message} />);
 
-    expect(screen.getByText('execute')).toBeInTheDocument();
+    expect(screen.getByText('tools.kinds.execute')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('message-permission-option-proceed_once'));
 
     expect(genericInvoke).toHaveBeenCalledTimes(1);
@@ -134,7 +179,7 @@ describe('permission message adapters', () => {
   it('keeps the ACP payload exact and defaults confirmation to allow_once', async () => {
     render(<MessageAcpPermission message={makeAcpMessage()} />);
 
-    expect(screen.getByText('edit')).toBeInTheDocument();
+    expect(screen.getByText('tools.kinds.edit')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('message-acp-permission-option-allow-once-id'));
 
     expect(acpInvoke).toHaveBeenCalledTimes(1);
@@ -248,7 +293,7 @@ describe('permission message adapters', () => {
     render(<MessagePermission message={message} />);
 
     expect(screen.getByText('messages.permissionRequest')).toBeInTheDocument();
-    expect(screen.getByText('tool')).toBeInTheDocument();
+    expect(screen.getByText('tools.kinds.tool')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('message-permission-option-option_0'));
 
     expect(genericInvoke).toHaveBeenCalledWith({

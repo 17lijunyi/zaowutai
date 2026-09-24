@@ -31,7 +31,11 @@
     "switchSuccess": "Modell erfolgreich gewechselt",
     "switchFailed": "Modellwechsel fehlgeschlagen",
     "searchPlaceholder": "Modelle suchen",
-    "noResults": "Keine passenden Modelle"
+    "noResults": "Keine passenden Modelle",
+    "loadModels": "Modelle laden",
+    "loadFailed": "Modelle konnten nicht geladen werden. Erneut versuchen oder Agentenkonfiguration prüfen.",
+    "refreshModels": "Modelle aktualisieren",
+    "refreshSuccess": "Modellliste aktualisiert"
   },
   "config": {
     "setting": "Einstellung wird angewendet...",
@@ -43,7 +47,18 @@
   "thoughtLevel": {
     "label": "Denk-Stufe",
     "switchSuccess": "Denk-Stufe gewechselt",
-    "switchFailed": "Wechsel der Denk-Stufe fehlgeschlagen"
+    "switchFailed": "Wechsel der Denk-Stufe fehlgeschlagen",
+    "levels": {
+      "none": "Keine",
+      "minimal": "Minimal",
+      "low": "Niedrig",
+      "medium": "Mittel",
+      "high": "Hoch",
+      "xhigh": "Sehr hoch",
+      "max": "Maximal",
+      "ultra": "Ultra",
+      "auto": "Automatisch"
+    }
   },
   "warmup": {
     "clickToWake": "Klicken, um dieses Mitglied zu aktivieren"

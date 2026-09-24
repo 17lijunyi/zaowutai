@@ -65,5 +65,24 @@
     "create": "crear",
     "modify": "modificar",
     "delete": "eliminar"
+  },
+  "kinds": {
+    "execute": "Ejecutar comando",
+    "edit": "Editar archivo",
+    "read": "Leer archivo",
+    "write": "Escribir archivo",
+    "fetch": "Obtener página",
+    "search": "Buscar contenido",
+    "tool": "Herramienta",
+    "ask": "Responder preguntas",
+    "list": "Listar archivos"
+  },
+  "summary": {
+    "viewSteps": "Ver pasos",
+    "loadError": "No se pudo cargar la salida completa",
+    "input": "Entrada",
+    "output": "Salida",
+    "callId": "ID de llamada de herramienta:",
+    "actionCount": "{{count}} acciones"
   }
 }

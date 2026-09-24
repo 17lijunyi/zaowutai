@@ -25,6 +25,11 @@
 
 本功能同时修改 AionUi 和 AionCore，必须将两者一起构建发布。仅重启当前已安装的旧版应用不会加载源码改动。
 
+本定制版在 `AionUi/package.json` 中配置了 `aioncoreSource: "../AionCore"`。
+正常打包时会使用该目录中固定的 Rust 工具链和 `Cargo.lock` 编译后台，再准备随包运行资源。
+源码缺失或编译失败会终止打包，不会自动改用上游同版本的发行包；上游 `v0.2.2` 并不包含模型对比台接口。
+构建机需要安装 Rust，并让 `cargo` 位于 PATH。应在目标系统和架构上构建；跨平台构建需要显式提供在对应机器上准备的完整 `AIONUI_BACKEND_LOCAL_BUNDLE_DIR`。
+
 专项验证：
 
 ```sh

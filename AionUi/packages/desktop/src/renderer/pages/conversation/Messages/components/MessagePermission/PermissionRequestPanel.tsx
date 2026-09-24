@@ -111,7 +111,7 @@ export const PermissionRequestPanel: React.FC<PermissionRequestPanelProps> = ({
         <div className={styles.heading}>
           <div className={styles.titleRow}>
             <Text className={styles.title}>{title}</Text>
-            <Text className={styles.operationBadge}>{operationKind}</Text>
+            <Text className={styles.operationBadge}>{t(`tools.kinds.${operationKind}`)}</Text>
           </div>
           {description && <Text className={styles.description}>{description}</Text>}
         </div>

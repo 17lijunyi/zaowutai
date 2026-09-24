@@ -186,6 +186,27 @@ describe('GuidActionRow skill/MCP submenu search', () => {
     environment.isDesktop = true;
   });
 
+  it('hides the duplicate Pi mode control while keeping the model selector', () => {
+    renderActionRow({
+      modeBackend: 'pi',
+      dynamicModes: [{ value: 'medium', label: 'Thinking: medium' }],
+      modelSelectorNode: <span>Pi model and thought level</span>,
+    });
+    expect(screen.queryByTestId('agent-mode-selector')).not.toBeInTheDocument();
+    expect(screen.getByText('Pi model and thought level')).toBeInTheDocument();
+  });
+
+  it('keeps permission controls for other agents', () => {
+    renderActionRow({ modeBackend: 'codex', dynamicModes: [{ value: 'default', label: 'Default' }] });
+    expect(screen.getByTestId('agent-mode-selector')).toBeInTheDocument();
+  });
+
+  it('omits the duplicate Pi mode from the mobile action sheet', () => {
+    environment.isMobile = true;
+    renderActionRow({ modeBackend: 'pi', dynamicModes: [{ value: 'medium', label: 'Thinking: medium' }] });
+    expect(screen.queryByTestId('permission')).not.toBeInTheDocument();
+  });
+
   it('offers both host files and device upload in the mobile WebUI action sheet', () => {
     environment.isMobile = true;
     environment.isDesktop = false;

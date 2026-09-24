@@ -44,6 +44,8 @@ vi.mock('@/renderer/hooks/agent/useManagedAgents', () => ({
 
 describe('useGuidAssistantSelection', () => {
   beforeEach(() => {
+    configGetMock.mockReset();
+    configSetMock.mockReset();
     configGetMock.mockReturnValue(undefined);
     configSetMock.mockResolvedValue(undefined);
     mockManagedAgents = [];
@@ -70,6 +72,84 @@ describe('useGuidAssistantSelection', () => {
         deletable: false,
       } satisfies Assistant,
     ];
+  });
+
+  it('keeps a manually chosen thought level after leaving and remounting the new-chat page', async () => {
+    const saved = new Map<string, unknown>();
+    configGetMock.mockImplementation((key: string) => saved.get(key));
+    configSetMock.mockImplementation(async (key: string, value: unknown) => {
+      saved.set(key, value);
+    });
+    mockManagedAgents = [
+      {
+        id: 'agent-claude',
+        config_options: [
+          {
+            id: 'reasoning_effort',
+            category: 'thought_level',
+            type: 'select',
+            current_value: 'max',
+            options: [
+              { value: 'high', name: 'high' },
+              { value: 'max', name: 'max' },
+            ],
+          },
+        ],
+      } as unknown as ManagedAgent,
+    ];
+    const first = renderHook(() => useGuidAssistantSelection({ resetAssistant: true, locationKey: 'first' }));
+    await waitFor(() => expect(first.result.current.selectedThoughtLevelValue).toBe('max'));
+    act(() => first.result.current.setSelectedThoughtLevelValue('high'));
+    await waitFor(() => expect(saved.get('guid.thoughtLevelByAssistant')).toEqual({ 'assistant-claude': 'high' }));
+    first.unmount();
+    const next = renderHook(() => useGuidAssistantSelection({ resetAssistant: true, locationKey: 'return' }));
+    await waitFor(() => expect(next.result.current.currentThoughtLevelOption?.currentValue).toBe('high'));
+    expect(next.result.current.selectedThoughtLevelValue).toBe('high');
+  });
+
+  it('scopes remembered effort to the assistant and waits for its catalog before restoring', async () => {
+    configGetMock.mockImplementation((key: string) =>
+      key === 'guid.thoughtLevelByAssistant' ? { 'assistant-claude': 'high', 'assistant-other': 'max' } : undefined
+    );
+    const page = renderHook(() => useGuidAssistantSelection({ resetAssistant: true }));
+    await waitFor(() => expect(page.result.current.selectedAssistantId).toBe('assistant-claude'));
+    expect(page.result.current.currentThoughtLevelOption).toBeNull();
+    mockManagedAgents = [
+      {
+        id: 'agent-claude',
+        config_options: [
+          {
+            id: 'reasoning_effort',
+            category: 'thought_level',
+            type: 'select',
+            current_value: 'low',
+            options: [{ value: 'low' }, { value: 'high' }],
+          },
+        ],
+      } as unknown as ManagedAgent,
+    ];
+    page.rerender();
+    await waitFor(() => expect(page.result.current.selectedThoughtLevelValue).toBe('high'));
+    act(() => page.result.current.setSelectedThoughtLevelValue('low', { persistPreference: false }));
+    expect(configSetMock).not.toHaveBeenCalled();
+    page.unmount();
+    // A removed/unsupported saved value must not be sent to the new catalog.
+    mockManagedAgents = [
+      {
+        id: 'agent-claude',
+        config_options: [
+          {
+            id: 'reasoning_effort',
+            category: 'thought_level',
+            type: 'select',
+            current_value: 'low',
+            options: [{ value: 'low' }],
+          },
+        ],
+      } as unknown as ManagedAgent,
+    ];
+    const next = renderHook(() => useGuidAssistantSelection({ resetAssistant: true }));
+    await waitFor(() => expect(next.result.current.selectedThoughtLevelValue).toBe('low'));
   });
 
   it('derives availability and model info from assistant catalog data', async () => {

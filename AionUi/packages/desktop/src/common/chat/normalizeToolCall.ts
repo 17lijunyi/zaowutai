@@ -6,6 +6,7 @@ export type NormalizedToolStatus = 'pending' | 'running' | 'completed' | 'error'
 export interface NormalizedToolCall {
   key: string;
   name: string;
+  protocolType?: string;
   status: NormalizedToolStatus;
   description?: string;
   input?: string;
@@ -212,6 +213,7 @@ export function normalizeToolCall(message: IMessageToolCall): NormalizedToolCall
   return {
     key: call_id,
     name,
+    protocolType: typeof input?.type === 'string' ? input.type : undefined,
     status: normalizeToolCallStatus(status),
     description: description || undefined,
     input: displayInput,

@@ -2,6 +2,8 @@
  * CLI wrapper for prepare-aioncore.
  *
  * Reads environment variables and invokes the shared module.
+ * When package.json configures aioncoreSource, builds that workspace backend
+ * instead of downloading an upstream release with the same version number.
  *
  * Version resolution order:
  *  1. AIONUI_BACKEND_RUN_ID env (download from AionCore Manual Build artifact)

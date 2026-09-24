@@ -1724,6 +1724,27 @@ async fn reader_task(
                         // server notification → SessionEvent(s)
                         let cur = turn_gen.load(Ordering::SeqCst);
                         let params = frame.get("params").unwrap_or(&Value::Null);
+                        // Codex subagents share this app-server transport. Route
+                        // thread-scoped notifications BEFORE changing bindings or
+                        // terminal state, otherwise child deltas become parent text
+                        // and a child's completion ends the parent's turn. Fields:
+                        // v2 AgentMessageDeltaNotification.threadId and
+                        // ThreadStartedNotification.thread.id (CLI-generated schema).
+                        // Approvals are connection-level reverse RPCs: a child's
+                        // request is still shown for a human decision, and its
+                        // matching resolution must clear the same pending card.
+                        let notification_thread = params.get("threadId").and_then(Value::as_str).or_else(|| {
+                            (m == "thread/started")
+                                .then(|| params.get("thread")?.get("id")?.as_str())
+                                .flatten()
+                        });
+                        if m != "serverRequest/resolved"
+                            && let Some(incoming) = notification_thread
+                            && let Some(bound) = thread_binding.lock().await.as_deref()
+                            && incoming != bound
+                        {
+                            continue;
+                        }
                         if m == "thread/started" {
                             // bind threadId (backend transport key, kept private).
                             if let Some(tid) = params.get("thread").and_then(|t| t.get("id")).and_then(Value::as_str) {
@@ -5114,6 +5135,97 @@ mod tests {
                 SessionEvent::BackendBound { backend_session_id: Some(tid) } if tid == "th-resume-anchor"
             )),
             "thread/started lowers BackendBound{{Some(threadId)}}, got {events:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn child_thread_notifications_do_not_mix_into_parent_turn() {
+        // Wire fields verified against codex-cli 0.155.0-alpha.9.2's generated
+        // v2/{AgentMessageDelta,ThreadStarted,TurnCompleted}Notification schemas.
+        // A child can emit on the same app-server stdout as its parent. The
+        // parent's collab item remains visible, but the child's own stream must
+        // not overwrite the resume anchor, mix text, or finish the parent turn.
+        let events = drive_codex(&[
+            r#"{"method":"thread/started","params":{"thread":{"id":"parent"}}}"#,
+            r#"{"method":"turn/started","params":{"threadId":"parent","turn":{"id":"parent-turn"}}}"#,
+            r#"{"method":"item/agentMessage/delta","params":{"threadId":"parent","turnId":"parent-turn","itemId":"parent-msg","delta":"主助手："}}"#,
+            r#"{"method":"thread/started","params":{"thread":{"id":"child"}}}"#,
+            r#"{"method":"turn/started","params":{"threadId":"child","turn":{"id":"child-turn"}}}"#,
+            r#"{"method":"item/agentMessage/delta","params":{"threadId":"child","turnId":"child-turn","itemId":"child-msg","delta":"子助手的独立回复"}}"#,
+            r#"{"method":"item/reasoning/textDelta","params":{"threadId":"child","turnId":"child-turn","itemId":"child-thought","delta":"child thought"}}"#,
+            r#"{"method":"turn/completed","params":{"threadId":"child","turn":{"id":"child-turn","status":"completed"}}}"#,
+            r#"{"method":"item/completed","params":{"threadId":"parent","turnId":"parent-turn","item":{"type":"collabAgentToolCall","id":"spawn","tool":"spawnAgent","status":"completed","senderThreadId":"parent","receiverThreadIds":["child"],"agentsStates":{"child":{"status":"completed","message":"child result"}}}}}"#,
+            r#"{"method":"item/agentMessage/delta","params":{"threadId":"parent","turnId":"parent-turn","itemId":"parent-msg","delta":"完成。"}}"#,
+            r#"{"method":"turn/completed","params":{"threadId":"parent","turn":{"id":"parent-turn","status":"completed"}}}"#,
+        ])
+        .await;
+        let text: String = events
+            .iter()
+            .filter_map(|event| match event {
+                SessionEvent::MessageDelta { text, .. } => Some(text.as_str()),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(text, "主助手：完成。", "child text must stay out of the parent reply");
+        assert!(
+            !events
+                .iter()
+                .any(|event| matches!(event, SessionEvent::ThoughtDelta { .. }))
+        );
+        let bindings: Vec<_> = events
+            .iter()
+            .filter_map(|event| match event {
+                SessionEvent::BackendBound {
+                    backend_session_id: Some(id),
+                } => Some(id.as_str()),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(bindings, vec!["parent"], "child must not replace the resume anchor");
+        let terminals = events
+            .iter()
+            .filter(|event| matches!(event, SessionEvent::TurnResult { .. }))
+            .count();
+        assert_eq!(terminals, 1, "only the parent may complete this turn");
+        assert!(
+            events.iter().any(|event| matches!(event,
+                SessionEvent::SubagentUpdate { r#ref, status: SubagentStatus::Completed, .. } if r#ref == "child"
+            )),
+            "the parent's collab summary must still be delivered"
+        );
+        let text_pos = events
+            .iter()
+            .rposition(|event| matches!(event, SessionEvent::MessageDelta { .. }))
+            .unwrap();
+        let terminal_pos = events
+            .iter()
+            .position(|event| matches!(event, SessionEvent::TurnResult { .. }))
+            .unwrap();
+        assert!(
+            terminal_pos > text_pos,
+            "child completion must not finish the parent's turn early"
+        );
+    }
+
+    #[tokio::test]
+    async fn child_thread_approval_still_requires_a_human_and_resolves_its_card() {
+        let events = drive_codex(&[
+            r#"{"method":"thread/started","params":{"thread":{"id":"parent"}}}"#,
+            r#"{"id":11,"method":"item/commandExecution/requestApproval","params":{"threadId":"child","turnId":"child-turn","itemId":"command","command":"echo audited","cwd":"/tmp"}}"#,
+            r#"{"method":"serverRequest/resolved","params":{"threadId":"child","requestId":11}}"#,
+        ])
+        .await;
+        assert!(
+            events.iter().any(|event| matches!(event,
+                SessionEvent::Permission { request_id, kind: PermissionKind::Tool, .. } if request_id == "11"
+            )),
+            "child approval must remain a permission request, never auto-approved"
+        );
+        assert!(
+            events.iter().any(|event| matches!(event,
+                SessionEvent::PermissionResolved { request_id, .. } if request_id == "11"
+            )),
+            "the child's resolved approval must not leave a stuck permission card"
         );
     }
 

@@ -62,6 +62,16 @@ const buildDetail = (
   }) satisfies AssistantDetail;
 
 describe('resolveGuidAssistantDefaults', () => {
+  it('restores the home selection ahead of the last conversation preference, but respects fixed defaults', () => {
+    expect(
+      resolveGuidAssistantDefaults(buildDetail({}, { last_thought_level_value: 'max' }), 'high').thoughtLevel
+    ).toBe('high');
+    expect(
+      resolveGuidAssistantDefaults(buildDetail({ thought_level: { mode: 'fixed', value: 'medium' } }), 'high')
+        .thoughtLevel
+    ).toBe('medium');
+  });
+
   it('returns fixed defaults directly', () => {
     const resolved = resolveGuidAssistantDefaults(
       buildDetail({

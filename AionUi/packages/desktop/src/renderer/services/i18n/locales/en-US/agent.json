@@ -31,7 +31,11 @@
     "switchSuccess": "Model switched successfully",
     "switchFailed": "Failed to switch model",
     "searchPlaceholder": "Search models",
-    "noResults": "No matching models"
+    "noResults": "No matching models",
+    "loadModels": "Load models",
+    "loadFailed": "Could not load models. Retry or check the agent configuration.",
+    "refreshModels": "Refresh models",
+    "refreshSuccess": "Model list refreshed"
   },
   "config": {
     "setting": "Applying setting...",
@@ -43,7 +47,18 @@
   "thoughtLevel": {
     "label": "Thinking Level",
     "switchSuccess": "Thinking level switched",
-    "switchFailed": "Failed to switch thinking level"
+    "switchFailed": "Failed to switch thinking level",
+    "levels": {
+      "none": "None",
+      "minimal": "Minimal",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "xhigh": "Very high",
+      "max": "Maximum",
+      "ultra": "Ultra",
+      "auto": "Auto"
+    }
   },
   "warmup": {
     "clickToWake": "Click to wake this member"

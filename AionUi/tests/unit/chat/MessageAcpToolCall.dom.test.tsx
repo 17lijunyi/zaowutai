@@ -234,9 +234,9 @@ describe('MessageAcpToolCall image output', () => {
 
   it('renders kind fallback labels when title is missing', () => {
     const cases: Array<[IMessageAcpToolCall['content']['update']['kind'], string]> = [
-      ['edit', 'File Edit'],
-      ['read', 'File Read'],
-      ['execute', 'Shell Command'],
+      ['edit', 'tools.kinds.edit'],
+      ['read', 'tools.kinds.read'],
+      ['execute', 'tools.kinds.execute'],
       ['custom' as IMessageAcpToolCall['content']['update']['kind'], 'custom'],
     ];
 
@@ -265,7 +265,7 @@ describe('MessageAcpToolCall image output', () => {
         })}
       />
     );
-    expect(screen.getByText('Pending')).toBeInTheDocument();
+    expect(screen.getByText('tools.status.pending')).toBeInTheDocument();
 
     rerender(
       <MessageAcpToolCall
@@ -275,7 +275,7 @@ describe('MessageAcpToolCall image output', () => {
         })}
       />
     );
-    expect(screen.getByText('In Progress')).toBeInTheDocument();
+    expect(screen.getByText('tools.status.executing')).toBeInTheDocument();
   });
 
   it('renders raw input and content variants', () => {

@@ -25,8 +25,9 @@ describe('release packaging configuration', () => {
   it('uses the custom display name while preserving the executable compatibility name', () => {
     const config = readProjectFile('packages/desktop/electron-builder.yml');
 
-    expect(config).toContain('productName: 产品经理工作台');
+    expect(config).toContain('productName: 造物台');
     expect(config).toContain('executableName: AionUi');
+    expect(yamlBlock(config, 'mac')).toContain('executableName: 造物台');
   });
 
   it('keeps mac zip artifacts enabled', () => {

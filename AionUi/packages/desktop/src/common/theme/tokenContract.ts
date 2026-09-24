@@ -80,6 +80,11 @@ export const THEME_TOKENS: readonly ThemeTokenDescriptor[] = [
   { key: '--brand-hover', group: 'brand', scope: 'appearance-scoped', description: 'Brand hover color' },
 
   // Component
+  { key: '--app-wallpaper', group: 'background', scope: 'appearance-scoped', description: 'App wallpaper' },
+  { key: '--glass-surface', group: 'component', scope: 'appearance-scoped', description: 'Frosted surface fill' },
+  { key: '--glass-elevated', group: 'component', scope: 'appearance-scoped', description: 'Raised frosted fill' },
+  { key: '--glass-border', group: 'border', scope: 'appearance-scoped', description: 'Frosted surface edge' },
+  { key: '--glass-shadow', group: 'component', scope: 'appearance-scoped', description: 'Frosted surface shadow' },
   {
     key: '--message-user-bg',
     group: 'component',

@@ -91,7 +91,7 @@ const GuidInputCard: React.FC<GuidInputCardProps> = ({
     ? 'rgb(var(--primary-3))'
     : isInputActive
       ? activeBorderColor
-      : inactiveBorderColor;
+      : `var(--glass-border, ${inactiveBorderColor})`;
 
   return (
     <div
@@ -109,14 +109,14 @@ const GuidInputCard: React.FC<GuidInputCardProps> = ({
               borderWidth: '1px',
             }
           : {
-              boxShadow: isInputActive ? activeShadow : 'none',
+              boxShadow: isInputActive ? `${activeShadow}, var(--glass-shadow)` : 'var(--glass-shadow)',
             }),
       }}
       {...dragHandlers}
     >
-      {/* inner white card — narrower than outer wrap */}
+      {/* The elevated input surface keeps text readable above the material. */}
       <div
-        className={`${styles.guidInputInner} relative p-12px flex flex-col bg-dialog-fill-0`}
+        className={`${styles.guidInputInner} relative p-12px flex flex-col`}
         style={{
           transition: 'box-shadow 0.25s ease, border-color 0.25s ease',
           borderColor: isFileDragging ? 'rgb(var(--primary-3))' : borderColor,

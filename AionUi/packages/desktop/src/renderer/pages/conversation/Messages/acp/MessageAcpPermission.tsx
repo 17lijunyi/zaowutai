@@ -8,11 +8,13 @@ import type { IMessageAcpPermission } from '@/common/chat/chatLib';
 import { conversation } from '@/common/adapter/ipcBridge';
 import {
   classifyAcpPermission,
+  getPermissionOptionLabel,
   normalizePermissionOperationKind,
   PermissionRequestPanel,
 } from '../components/MessagePermission';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { getToolDisplayName } from '@/renderer/services/i18n/toolLabels';
 
 type MessageAcpPermissionProps = {
   message: IMessageAcpPermission;
@@ -30,11 +32,13 @@ const MessageAcpPermission: React.FC<MessageAcpPermissionProps> = React.memo(({ 
       options.map((option, index) => {
         const fallbackId = `option_${index}`;
         const value = option?.option_id || fallbackId;
+        const intent = classifyAcpPermission(option?.kind || '');
+        const label = getPermissionOptionLabel(option?.name || '', intent, t);
         return {
           id: `${value}:${index}`,
           value,
-          label: option?.name || `${t('messages.option')} ${index + 1}`,
-          intent: classifyAcpPermission(option?.kind || ''),
+          label: label || `${t('messages.option')} ${index + 1}`,
+          intent,
           testId: `message-acp-permission-option-${value}`,
         };
       }),
@@ -85,7 +89,7 @@ const MessageAcpPermission: React.FC<MessageAcpPermissionProps> = React.memo(({ 
     <PermissionRequestPanel
       requestKey={`${message.id}:${tool_call.tool_call_id}`}
       testIdPrefix='message-acp-permission'
-      title={title}
+      title={getToolDisplayName(title, t)}
       description={description && description !== title ? description : undefined}
       operationKind={normalizePermissionOperationKind(tool_call.kind)}
       detail={detail}

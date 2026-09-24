@@ -23,6 +23,7 @@ export type ConfigKeyMap = {
   'theme.userThemes': Theme[];
   'workspace.pasteConfirm': boolean | undefined;
   'guid.lastAssistantId': string | undefined;
+  'guid.thoughtLevelByAssistant': Record<string, string> | undefined;
   /** User-defined order for the enabled assistant picker surfaces. */
   'assistants.enabledOrder': string[] | undefined;
   'upload.saveToWorkspace': boolean | undefined;

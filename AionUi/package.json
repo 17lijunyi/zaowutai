@@ -261,6 +261,7 @@
   "engines": {
     "node": ">=22 <25"
   },
+  "aioncoreSource": "../AionCore",
   "aioncoreVersion": "v0.2.2",
   "electronRebuild": {
     "electronVersion": "^37.3.1"
@@ -268,5 +269,5 @@
   "patchedDependencies": {
     "7zip-bin@5.2.0": "patches/7zip-bin@5.2.0.patch"
   },
-  "productName": "产品经理工作台"
+  "productName": "造物台"
 }

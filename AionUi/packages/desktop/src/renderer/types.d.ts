@@ -73,3 +73,8 @@ declare module 'wavedrom/skins/dark.js' {
   const skin: import('wavedrom').WaveSkin;
   export default skin;
 }
+
+declare module '*.webp' {
+  const url: string;
+  export default url;
+}

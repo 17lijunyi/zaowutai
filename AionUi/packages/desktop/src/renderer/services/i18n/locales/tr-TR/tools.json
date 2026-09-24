@@ -65,5 +65,24 @@
     "create": "oluştur",
     "modify": "değiştir",
     "delete": "sil"
+  },
+  "kinds": {
+    "execute": "Komut çalıştır",
+    "edit": "Dosyayı düzenle",
+    "read": "Dosyayı oku",
+    "write": "Dosyaya yaz",
+    "fetch": "Sayfayı getir",
+    "search": "İçerik ara",
+    "tool": "Araç",
+    "ask": "Soruları yanıtla",
+    "list": "Dosyaları listele"
+  },
+  "summary": {
+    "viewSteps": "Adımları görüntüle",
+    "loadError": "Tam çıktı yüklenemedi",
+    "input": "Girdi",
+    "output": "Çıktı",
+    "callId": "Araç çağrısı kimliği:",
+    "actionCount": "{{count}} işlem"
   }
 }

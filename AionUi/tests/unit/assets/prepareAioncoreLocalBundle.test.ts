@@ -6,6 +6,42 @@ import { join } from 'node:path';
 const { prepareAioncore } = require('../../../packages/shared-scripts/src/prepare-aioncore');
 
 describe('prepare-aioncore local bundle input', () => {
+  it('does not silently download upstream when the configured fork source is missing', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'aionui-workspace-backend-'));
+    const projectRoot = join(tmp, 'project');
+    mkdirSync(projectRoot, { recursive: true });
+    writeFileSync(join(projectRoot, 'package.json'), JSON.stringify({ aioncoreSource: '../missing-core' }));
+    try {
+      expect(() =>
+        prepareAioncore({ projectRoot, platform: process.platform, arch: process.arch, version: 'v0.2.2' })
+      ).toThrow(/Configured AionCore source is missing.*Refusing to replace it with upstream/);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses to execute a workspace backend compiled for a different host', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'aionui-workspace-backend-target-'));
+    const projectRoot = join(tmp, 'project');
+    const sourceRoot = join(tmp, 'core');
+    mkdirSync(projectRoot, { recursive: true });
+    mkdirSync(sourceRoot);
+    writeFileSync(join(projectRoot, 'package.json'), JSON.stringify({ aioncoreSource: '../core' }));
+    writeFileSync(join(sourceRoot, 'Cargo.toml'), '[workspace]\n');
+    try {
+      expect(() =>
+        prepareAioncore({
+          projectRoot,
+          platform: process.platform === 'win32' ? 'darwin' : 'win32',
+          arch: process.arch,
+          version: 'v0.2.2',
+        })
+      ).toThrow(/Build AionCore on the target host/);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
   it('hard fails local bundle input that lacks managed-resources manifest', () => {
     const tmp = mkdtempSync(join(tmpdir(), 'aionui-local-bundle-'));
     const projectRoot = join(tmp, 'project');

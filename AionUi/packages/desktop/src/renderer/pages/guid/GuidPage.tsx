@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { readGuidThoughtLevel } from './utils/thoughtLevelPreference';
 import { ipcBridge } from '@/common';
 import { buildGuidSlashCommands } from '@/common/chat/slash/guidSlashCommands';
 import type { SlashCommandItem } from '@/common/chat/slash/types';
@@ -169,8 +170,8 @@ const GuidPage: React.FC = () => {
         .catch((_error: unknown): AssistantDetail | null => null)
   );
   const resolvedAssistantDefaults = useMemo(
-    () => resolveGuidAssistantDefaults(selectedAssistantDetail),
-    [selectedAssistantDetail]
+    () => resolveGuidAssistantDefaults(selectedAssistantDetail, readGuidThoughtLevel(selectedAssistantId)),
+    [selectedAssistantDetail, selectedAssistantId]
   );
   const selectedSkillNames = useMemo(() => {
     const disabledBuiltinSkillSet = new Set(
@@ -353,7 +354,10 @@ const GuidPage: React.FC = () => {
       return;
     }
 
-    const resolvedDefaults = resolveGuidAssistantDefaults(selectedAssistantDetail);
+    const resolvedDefaults = resolveGuidAssistantDefaults(
+      selectedAssistantDetail,
+      readGuidThoughtLevel(selectedAssistantId)
+    );
     setGuidDisabledBuiltinSkills(resolvedDefaults.disabledBuiltinSkillIds);
     setGuidEnabledSkills(resolvedDefaults.skillIds);
   }, [selectedAssistantDetail, selectedAssistantId]);
@@ -395,7 +399,10 @@ const GuidPage: React.FC = () => {
     appliedAssistantDefaultsKeyRef.current = signature;
 
     const applyAssistantDefaults = async () => {
-      const resolvedDefaults = resolveGuidAssistantDefaults(selectedAssistantDetail);
+      const resolvedDefaults = resolveGuidAssistantDefaults(
+        selectedAssistantDetail,
+        readGuidThoughtLevel(selectedAssistantId)
+      );
       const effectiveBackend = agentSelection.selectedAssistantBackend;
       const shouldApplyDefaultModel = manualModelSelectionAssistantRef.current !== selectedAssistantId;
       const shouldApplyDefaultThoughtLevel = manualThoughtLevelSelectionAssistantRef.current !== selectedAssistantId;
@@ -491,9 +498,9 @@ const GuidPage: React.FC = () => {
   const setGuidSelectedThoughtLevel = useCallback(
     (value: string) => {
       manualThoughtLevelSelectionAssistantRef.current = selectedAssistantId;
-      agentSelection.setSelectedThoughtLevelValue(value, { persistPreference: !hasSelectedAssistant });
+      agentSelection.setSelectedThoughtLevelValue(value);
     },
-    [agentSelection, hasSelectedAssistant, selectedAssistantId]
+    [agentSelection, selectedAssistantId]
   );
   const setGuidCurrentModel = useCallback(
     (model: TProviderWithModel) => {
@@ -591,6 +598,8 @@ const GuidPage: React.FC = () => {
   // Build the model selector node
   const modelSelectorNode = (
     <GuidModelSelector
+      key={selectedAssistantId ?? 'none'}
+      agentId={agentSelection.selectedAssistant?.agent_id}
       isGeminiMode={isGeminiMode}
       modelList={modelSelection.modelList}
       current_model={modelSelection.current_model}

@@ -14,9 +14,10 @@ import {
   replaceUpstreamBrand,
 } from '@/common/branding';
 
-describe('product-manager workbench branding', () => {
-  it('uses the PM monogram for compact brand surfaces', () => {
-    expect(APP_MONOGRAM).toBe('PM');
+describe('Zaowutai branding', () => {
+  it('uses the compact brand mark', () => {
+    expect(APP_DISPLAY_NAME).toBe('造物台');
+    expect(APP_MONOGRAM).toBe('造');
   });
 
   it('does not let the custom build install upstream releases', () => {
@@ -29,7 +30,7 @@ describe('product-manager workbench branding', () => {
     );
   });
 
-  it('uses the product-manager name for the built-in butler', () => {
+  it('uses the custom name for the built-in butler', () => {
     expect(replaceUpstreamBrand('AionUi管家 / AionUI Butler')).toBe(`${BUTLER_DISPLAY_NAME} / ${BUTLER_DISPLAY_NAME}`);
   });
 

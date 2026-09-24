@@ -1,3 +1,5 @@
+import { getThoughtLevelLabel } from '@/renderer/utils/model/thoughtLevelLabel';
+import { getCurrentThoughtLevelLabel } from '@/renderer/components/agent/runtimeSelectorOptions';
 import { ipcBridge } from '@/common';
 import type { IConversationMcpStatus } from '@/common/config/storage';
 import { isBackendHttpError } from '@/common/adapter/httpBridge';
@@ -599,15 +601,12 @@ Please check your local CLI tool authentication status`,
         key: 'thought-level',
         icon: <Brain theme='outline' size='16' />,
         label: t('agent.thoughtLevel.label'),
-        meta:
-          runtimeThoughtLevel.options.find((item) => item.value === runtimeThoughtLevel.currentValue)?.label ||
-          runtimeThoughtLevel.currentValue ||
-          '',
+        meta: getCurrentThoughtLevelLabel(runtimeThoughtLevel, t),
         submenu: {
           title: t('agent.thoughtLevel.label'),
           options: runtimeThoughtLevel.options.map((item) => ({
             key: item.value,
-            label: item.label,
+            label: getThoughtLevelLabel(item.value, item.label, t),
             description: item.description ?? undefined,
             active: runtimeThoughtLevel.currentValue === item.value,
           })),

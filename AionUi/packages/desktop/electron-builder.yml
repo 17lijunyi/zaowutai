@@ -1,5 +1,5 @@
 appId: com.aionui.app
-productName: 产品经理工作台
+productName: 造物台
 executableName: AionUi
 copyright: Copyright © 2024 AionUi
 
@@ -130,6 +130,7 @@ nsis:
   differentialPackage: false
 
 mac:
+  executableName: 造物台
   target:
     - dmg
     - zip
@@ -175,7 +176,7 @@ linux:
   description: ${description}
   desktop:
     entry:
-      Name: 产品经理工作台
+      Name: 造物台
       Comment: ${description}
       Icon: AionUi
       Categories: Office;Utility;
